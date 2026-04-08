@@ -3,7 +3,7 @@ import math
 # NODES (Coordinates)
 
 nodes = {
-    "A": (4, 1),
+    "A": (1, 1),
     "B": (3, 1),
     "C": (5, 1),
     "D": (7, 1),
