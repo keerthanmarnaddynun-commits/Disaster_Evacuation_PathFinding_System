@@ -1,0 +1,182 @@
+[
+  {
+    "event_id": "EVT-001",
+    "type": "flood",
+    "severity": "high",
+    "affected_nodes": [
+      "N003",
+      "N004",
+      "N006"
+    ],
+    "blocked_edges": [
+      [
+        "N003",
+        "N004"
+      ],
+      [
+        "N006",
+        "N007"
+      ]
+    ],
+    "timestamp": "2024-01-15T08:30:00",
+    "active": false
+  },
+  {
+    "event_id": "EVT-002",
+    "type": "earthquake",
+    "severity": "medium",
+    "affected_nodes": [
+      "N019",
+      "N020",
+      "N021"
+    ],
+    "blocked_edges": [
+      [
+        "N019",
+        "N020"
+      ],
+      [
+        "N021",
+        "N022"
+      ]
+    ],
+    "timestamp": "2024-03-22T14:15:00",
+    "active": false
+  },
+  {
+    "event_id": "EVT-003",
+    "type": "fire",
+    "severity": "high",
+    "affected_nodes": [
+      "N013",
+      "N014",
+      "N015"
+    ],
+    "blocked_edges": [
+      [
+        "N013",
+        "N014"
+      ],
+      [
+        "N014",
+        "N015"
+      ]
+    ],
+    "timestamp": "2024-06-08T19:45:00",
+    "active": false
+  },
+  {
+    "event_id": "EVT-SPREAD-663c14fc",
+    "type": "earthquake",
+    "severity": "high",
+    "affected_nodes": [
+      "N013",
+      "N014",
+      "N015",
+      "N016",
+      "N017",
+      "N018"
+    ],
+    "blocked_edges": [
+      [
+        "N008",
+        "N014"
+      ],
+      [
+        "N010",
+        "N018"
+      ],
+      [
+        "N011",
+        "N016"
+      ],
+      [
+        "N012",
+        "N013"
+      ],
+      [
+        "N013",
+        "N018"
+      ],
+      [
+        "N015",
+        "N016"
+      ],
+      [
+        "N015",
+        "N021"
+      ],
+      [
+        "N016",
+        "N017"
+      ],
+      [
+        "N017",
+        "N018"
+      ]
+    ],
+    "timestamp": "2026-04-12T19:49:35+00:00",
+    "active": false
+  },
+  {
+    "event_id": "EVT-SPREAD-2abfba8a",
+    "type": "earthquake",
+    "severity": "high",
+    "affected_nodes": [
+      "N013",
+      "N014",
+      "N015",
+      "N016",
+      "N017",
+      "N018"
+    ],
+    "blocked_edges": [
+      [
+        "N008",
+        "N014"
+      ],
+      [
+        "N010",
+        "N018"
+      ],
+      [
+        "N011",
+        "N016"
+      ],
+      [
+        "N012",
+        "N013"
+      ],
+      [
+        "N013",
+        "N014"
+      ],
+      [
+        "N013",
+        "N018"
+      ],
+      [
+        "N014",
+        "N015"
+      ],
+      [
+        "N015",
+        "N016"
+      ],
+      [
+        "N015",
+        "N021"
+      ],
+      [
+        "N016",
+        "N017"
+      ],
+      [
+        "N017",
+        "N018"
+      ]
+    ],
+    "timestamp": "2026-04-12T19:52:39+00:00",
+    "active": true
+  }
+]

@@ -1,0 +1,5 @@
+log_id,timestamp,zone,algorithm_used,path,total_cost,people_evacuated,rescue_unit,status
+LOG-001,2024-06-10T10:00:00,Zone-C,dijkstra,"N015,N016,N017,N018",18.5,45,RU-A02,completed
+LOG-002,2024-06-10T11:22:00,Zone-A,astar,"N002,N005",12.3,12,RU-P01,completed
+LOG-003,2024-06-10T12:05:00,Zone-D,bfs,"N019,N024,N025",22.0,30,RU-F03,in_progress
+LOG-004,2026-04-12T19:51:19+00:00,Zone-B,dijkstra,"N012,N007",8.7231,10,RU-A02,completed

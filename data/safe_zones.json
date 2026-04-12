@@ -1,0 +1,34 @@
+[
+  {
+    "id": "SZ-01",
+    "name": "Downtown Evacuation Hub",
+    "node_id": "N005",
+    "capacity": 5000,
+    "current_occupancy": 420,
+    "resources": ["food", "medical", "shelter", "water"]
+  },
+  {
+    "id": "SZ-02",
+    "name": "North Evacuation Center",
+    "node_id": "N012",
+    "capacity": 4500,
+    "current_occupancy": 310,
+    "resources": ["food", "medical", "shelter"]
+  },
+  {
+    "id": "SZ-03",
+    "name": "Central Assembly Point",
+    "node_id": "N018",
+    "capacity": 6000,
+    "current_occupancy": 890,
+    "resources": ["food", "medical", "shelter", "water", "charging"]
+  },
+  {
+    "id": "SZ-04",
+    "name": "West Fields Safe Zone",
+    "node_id": "N025",
+    "capacity": 4000,
+    "current_occupancy": 180,
+    "resources": ["food", "shelter", "water"]
+  }
+]

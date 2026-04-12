@@ -1,0 +1,58 @@
+[
+  {
+    "unit_id": "RU-A01",
+    "name": "Medic-1",
+    "type": "ambulance",
+    "location_node": "N003",
+    "status": "available"
+  },
+  {
+    "unit_id": "RU-A02",
+    "name": "Medic-2",
+    "type": "ambulance",
+    "location_node": "N007",
+    "status": "deployed"
+  },
+  {
+    "unit_id": "RU-A03",
+    "name": "Medic-3",
+    "type": "ambulance",
+    "location_node": "N027",
+    "status": "deployed"
+  },
+  {
+    "unit_id": "RU-F01",
+    "name": "Engine-4",
+    "type": "fire",
+    "location_node": "N008",
+    "status": "available"
+  },
+  {
+    "unit_id": "RU-F02",
+    "name": "Engine-7",
+    "type": "fire",
+    "location_node": "N018",
+    "status": "available"
+  },
+  {
+    "unit_id": "RU-F03",
+    "name": "Ladder-2",
+    "type": "fire",
+    "location_node": "N022",
+    "status": "returning"
+  },
+  {
+    "unit_id": "RU-P01",
+    "name": "Patrol-North",
+    "type": "police",
+    "location_node": "N010",
+    "status": "available"
+  },
+  {
+    "unit_id": "RU-P02",
+    "name": "Patrol-South",
+    "type": "police",
+    "location_node": "N024",
+    "status": "available"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "zone_id": "Zone-A",
+    "name": "Harbor & Downtown",
+    "risk_level": "high",
+    "population": 15200,
+    "assigned_safe_zone": "SZ-01",
+    "nodes": ["N001", "N002", "N003", "N004", "N005", "N006"]
+  },
+  {
+    "zone_id": "Zone-B",
+    "name": "North Ridge & University",
+    "risk_level": "medium",
+    "population": 12800,
+    "assigned_safe_zone": "SZ-02",
+    "nodes": ["N007", "N008", "N009", "N010", "N011", "N012"]
+  },
+  {
+    "zone_id": "Zone-C",
+    "name": "Industrial East",
+    "risk_level": "critical",
+    "population": 9400,
+    "assigned_safe_zone": "SZ-03",
+    "nodes": ["N013", "N014", "N015", "N016", "N017", "N018"]
+  },
+  {
+    "zone_id": "Zone-D",
+    "name": "Southport Coastal",
+    "risk_level": "high",
+    "population": 11100,
+    "assigned_safe_zone": "SZ-04",
+    "nodes": ["N019", "N020", "N021", "N022", "N023", "N024"]
+  },
+  {
+    "zone_id": "Zone-E",
+    "name": "West Fields",
+    "risk_level": "low",
+    "population": 6200,
+    "assigned_safe_zone": "SZ-01",
+    "nodes": ["N025", "N026", "N027", "N028", "N029", "N030"]
+  }
+]
