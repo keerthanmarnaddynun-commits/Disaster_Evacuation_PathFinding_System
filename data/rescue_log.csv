@@ -1,5 +1,28 @@
-log_id,timestamp,zone,algorithm_used,path,total_cost,people_evacuated,rescue_unit,status
-LOG-001,2024-06-10T10:00:00,Zone-C,dijkstra,"N015,N016,N017,N018",18.5,45,RU-A02,completed
-LOG-002,2024-06-10T11:22:00,Zone-A,astar,"N002,N005",12.3,12,RU-P01,completed
-LOG-003,2024-06-10T12:05:00,Zone-D,bfs,"N019,N024,N025",22.0,30,RU-F03,in_progress
-LOG-004,2026-04-12T19:51:19+00:00,Zone-B,dijkstra,"N012,N007",8.7231,10,RU-A02,completed
+log_id,timestamp,city,team_id,team_name,team_type,from_node,from_name,to_node,to_name,algorithm_used,path_length,nodes_explored,time_ms,people_rescued,fuel_used,medical_kits_used,knapsack_selected,status
+LOG-46ccb040,2026-04-13T14:19:59,Veridian City,H001,Heli-1,helicopter,N001,N001,N011,N011,UCS,5,6,0.0185829994734376,280,10,1,True,dispatched
+LOG-411f072a,2026-04-13T14:21:48,Veridian City,U001,Alpha-1,ambulance,N003,N003,N003,N003,DFS,0,1,0.0005000001692678,240,0,1,True,dispatched
+LOG-d2d3cfed,2026-04-13T14:28:18,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0003749992174562,90,0,1,True,dispatched
+LOG-87b4baac,2026-04-13T14:28:18,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0004999983502784,90,0,1,True,dispatched
+LOG-6a8cd4e5,2026-04-13T14:28:19,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.000416999682784,90,0,1,True,dispatched
+LOG-c77ea41e,2026-04-13T14:28:32,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0005000001692678,90,0,1,True,dispatched
+LOG-5bf2acc0,2026-04-13T14:28:32,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0003749992174562,90,0,1,True,dispatched
+LOG-b3fffa4b,2026-04-13T14:28:33,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0005420006345957,90,0,1,True,dispatched
+LOG-e59841b7,2026-04-13T14:28:33,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.000874999386724,90,0,1,True,dispatched
+LOG-29bba0eb,2026-04-13T14:28:33,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0003750010364456,90,0,1,True,dispatched
+LOG-08194b50,2026-04-13T14:28:33,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.00045799970394,90,0,1,True,dispatched
+LOG-90f784ef,2026-04-13T14:28:34,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0004590001481119,90,0,1,True,dispatched
+LOG-a09825a7,2026-04-13T14:28:34,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.00045799970394,90,0,1,True,dispatched
+LOG-303b3484,2026-04-13T14:28:37,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0003750010364456,90,0,1,True,dispatched
+LOG-fcee4051,2026-04-13T14:28:37,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.000416999682784,90,0,1,True,dispatched
+LOG-31d277e9,2026-04-13T14:28:38,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0003330005711177,90,0,1,True,dispatched
+LOG-d515d08c,2026-04-13T14:28:38,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.00045799970394,90,0,1,True,dispatched
+LOG-7a842431,2026-04-13T14:28:38,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0005000001692678,90,0,1,True,dispatched
+LOG-41860371,2026-04-13T14:28:38,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0005420006345957,90,0,1,True,dispatched
+LOG-bc881270,2026-04-13T14:28:38,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0005839992809342,90,0,1,True,dispatched
+LOG-d0e75aaf,2026-04-13T14:28:39,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0017080001271096,90,0,1,True,dispatched
+LOG-d6e9bdb4,2026-04-13T14:28:39,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.00045799970394,90,0,1,True,dispatched
+LOG-2218bd25,2026-04-13T14:28:39,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.000416999682784,90,0,1,True,dispatched
+LOG-c6c40852,2026-04-13T14:28:39,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.00045799970394,90,0,1,True,dispatched
+LOG-946e9d8a,2026-04-13T14:28:39,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0004590001481119,90,0,1,True,dispatched
+LOG-b412b563,2026-04-13T14:29:51,Veridian City,U002,Alpha-2,ambulance,N016,N016,N016,N016,DFS,0,1,0.0005830006557516,120,0,1,True,dispatched
+LOG-e56b0a8e,2026-04-13T14:30:14,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0003749992174562067,90,0,1,True,dispatched

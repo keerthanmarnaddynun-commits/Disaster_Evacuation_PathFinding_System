@@ -1,177 +1,165 @@
-"""Rescue coordination UI + mission scheduling."""
-
 from __future__ import annotations
 
-import uuid
+import time
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from core import data_loader, evacuation_planner, rescue_coordinator
-from core.interval_scheduler import RescueMission, RescueScheduler, load_missions_from_disk
-from utils import app_state
+from core.algorithm_selector import select_and_run
+from core.data_loader import load_city_graph, load_disaster_events, load_rescue_log_df, load_rescue_units_df
+from core.dynamic_obstacles import block_road_live
+from core.graph_engine import get_positions, load_graph
+from core.greedy_selector import nearest_team_to_target
+from core.knapsack import build_victim_list, knapsack_01
+from core.mission_manager import MissionManager
+from utils.visualizer import build_city_map
 
 
-def render() -> None:
-    st.header("Rescue Coordination")
-    G = app_state.get_city_graph()
-    units = rescue_coordinator.load_units()
-    zones = data_loader.read_evacuation_zones()
-    safe = data_loader.read_safe_zones()
+def _badge(status: str) -> str:
+    color = {"en_route": "#f1c40f", "arrived": "#3498db", "rescued": "#9b59b6", "returning": "#4f8ef7", "complete": "#2ecc71"}.get(status, "#777")
+    return f"<span style='background:{color};color:#fff;border-radius:999px;padding:3px 10px;font-weight:700;'>{status}</span>"
 
-    st.subheader("Rescue units")
-    st.dataframe(units, use_container_width=True)
 
-    zone_labels = {f"{z['name']} ({z['zone_id']})": z for z in zones}
-    pick = st.selectbox("Zone in distress", list(zone_labels.keys()))
-    zone = zone_labels[pick]
+def render():
+    city = st.session_state.get("active_city", "Veridian City")
+    city_data = load_city_graph(city)
+    events = load_disaster_events(city)
+    units_df = load_rescue_units_df(city)
+    nodes_df = pd.DataFrame(city_data.get("nodes", []))
+    node_name = {n["id"]: n.get("name", n["id"]) for n in city_data.get("nodes", [])}
+    G = load_graph(city_data)
+    positions = get_positions(city_data)
+    mm = MissionManager()
 
-    wadj_mode = st.selectbox("Dispatch weight mode", ["fastest", "balanced"], format_func=lambda x: x.title())
+    st.title("Rescue Operations Center")
+    st.caption(city)
+    live = st.toggle("Live Updates (5s refresh)", key="live_refresh")
 
-    rec = rescue_coordinator.get_optimal_dispatch(G, units, zone, mode=wadj_mode)
-    if rec:
-        st.info(f"Recommended unit: **{rec['name']}** ({rec['unit_id']}) at `{rec['location_node']}`")
-    else:
-        st.warning("No available unit found.")
-
-    people = st.number_input("People evacuated (log)", min_value=0, value=10, step=1)
-
-    if st.button("Dispatch recommended unit", type="primary") and rec:
-        path_result = evacuation_planner.plan_route(
-            G,
-            rec["location_node"],
-            zone["nodes"][0],
-            "Dijkstra",
-            wadj_mode,
-            active_events=data_loader.read_disaster_events(),
-        )
-        path = path_result.get("path") or []
-        cost = float(path_result.get("weighted_cost", 0) or 0)
-        rescue_coordinator.assign_unit(
-            G,
-            rec,
-            zone["zone_id"],
-            algorithm_used="dijkstra",
-            route_path=path,
-            total_cost=cost,
-            people=int(people),
-            status="deployed",
-        )
-        app_state.refresh_base_graph()
-        st.success("Dispatch logged.")
-        st.rerun()
-
-    st.subheader("Mission Scheduler")
-    missions = load_missions_from_disk()
-    st.caption("Missions persist to `data/rescue_missions.json`.")
-
-    with st.form("new_mission"):
-        st.write("Add mission")
-        zid = st.selectbox("Zone", [z["zone_id"] for z in zones], key="ms_zone")
-        t0 = st.number_input("Start time (min from onset)", 0.0, 10000.0, 0.0)
-        t1 = st.number_input("End time (min from onset)", 0.0, 10000.0, 60.0)
-        pr = st.selectbox("Priority", [1, 2, 3, 4], format_func=lambda x: f"{x} ({'critical' if x==1 else 'high' if x==2 else 'medium' if x==3 else 'low'})")
-        pc = st.number_input("People count", 1, 100000, 50)
-        ut = st.selectbox("Required unit type", ["any", "ambulance", "fire", "police"])
-        submitted = st.form_submit_button("Add mission to queue")
-        if submitted:
-            mid = f"M-{uuid.uuid4().hex[:8].upper()}"
-            missions.append(
-                RescueMission(
-                    mission_id=mid,
-                    zone=zid,
-                    start_time=float(t0),
-                    end_time=float(t1),
-                    priority=int(pr),
-                    people_count=int(pc),
-                    required_unit_type=str(ut),
-                    assigned_unit=None,
-                    status="pending",
-                )
-            )
-            from core.interval_scheduler import persist_missions
-
-            persist_missions(missions)
-            st.success("Mission saved.")
-            st.rerun()
-
-    strat = st.selectbox(
-        "Scheduling strategy",
-        ["priority_first", "maximize_missions", "maximize_people"],
-        format_func=lambda x: {
-            "priority_first": "Priority First",
-            "maximize_missions": "Maximize Missions",
-            "maximize_people": "Maximize People Rescued",
-        }[x],
+    st.subheader("Team Status Overview")
+    teams = units_df.copy()
+    teams["fuel_pct"] = (teams["fuel_remaining"] / teams["fuel_capacity"]) * 100
+    team_status_df = teams.rename(
+        columns={
+            "name": "Team",
+            "unit_type": "Type",
+            "current_node": "Current Location",
+            "status": "Status",
+            "fuel_pct": "Fuel %",
+            "medical_kits": "Kits",
+            "total_rescued": "Rescued",
+        }
+    )[["Team", "Type", "Current Location", "Status", "Fuel %", "Kits", "Rescued"]]
+    team_status_styler = team_status_df.style.map(
+        lambda v: "background-color:#e74c3c;" if isinstance(v, (int, float)) and v < 20 else "",
+        subset=["Fuel %"],
     )
+    st.dataframe(team_status_styler, use_container_width=True)
 
-    if st.button("Run Scheduler", type="primary"):
-        sched = RescueScheduler(missions, units, G=G)
-        sched.schedule(strategy=strat)
-        st.session_state["_last_sched"] = sched
-        st.rerun()
+    st.subheader("Active Missions")
+    active = [m for m in mm.load() if m.get("status") != "complete" and m.get("city") == city]
+    if not active:
+        st.info("No active missions. Dispatch a team below.")
+    for m in active:
+        with st.container(border=True):
+            st.markdown(f"**{m['mission_id']} | {m['team_name']} ({m['team_type']}) | {m['algorithm_used']}** &nbsp;&nbsp; {_badge(m['status'])}", unsafe_allow_html=True)
+            cur = m["current_step"]
+            total = max(1, len(m["path"]) - 1)
+            st.progress(cur / total, text=f"Step {cur} of {total} — At: {m['path_names'][cur]}")
+            if m["status"] in {"en_route", "returning"}:
+                if st.button("Advance One Step", key=f"adv_{m['mission_id']}"):
+                    mm.advance_step(m["mission_id"])
+                    st.rerun()
+                with st.expander("Block a Road"):
+                    all_edges = sorted({tuple(sorted((e["source"], e["target"]))) for e in city_data.get("edges", [])})
+                    selected = st.selectbox("Select road to block", all_edges, key=f"blk_{m['mission_id']}")
+                    if st.button("Block Selected Road", key=f"doblk_{m['mission_id']}"):
+                        out = block_road_live(G, selected[0], selected[1], active)
+                        if m["mission_id"] in out["affected_missions"]:
+                            old_steps = len(m["path"]) - 1
+                            old_algo = m["algorithm_used"]
+                            new_m = mm.replan_mission(m["mission_id"], G, events, positions, city_data)
+                            st.warning(f"This mission's path is now invalid. Replanned from {old_steps} steps via {old_algo} to {len(new_m['path'])-1} via {new_m['algorithm_used']}.")
+                            st.rerun()
+            elif m["status"] == "arrived":
+                st.info(f"Team has arrived at {m['target_name']}. {m['people_at_target']} people waiting. Injury: {m['injury_level']}")
+                if st.button(f"Confirm Rescue ({m['people_at_target']} people)", key=f"rescue_{m['mission_id']}"):
+                    mm.confirm_rescue(m["mission_id"], m["people_at_target"])
+                    st.rerun()
+            elif m["status"] == "rescued":
+                st.info("Rescue complete. Ready to return to base.")
+                if st.button("Start Return Journey", key=f"ret_{m['mission_id']}"):
+                    mm.start_return(m["mission_id"])
+                    st.rerun()
 
-    sched = st.session_state.get("_last_sched")
-    if isinstance(sched, RescueScheduler):
-        stats = sched.get_statistics()
-        st.subheader("Schedule statistics")
-        st.json(stats)
+    st.subheader("Dispatch Rescue Team")
+    left, right = st.columns([1, 1.2])
+    victims = nodes_df[nodes_df["people_stranded"] > 0].copy().sort_values("people_stranded", ascending=False)
+    with left:
+        tgt = st.selectbox("Target Node", victims["id"].tolist(), format_func=lambda n: node_name.get(n, n))
+        available = units_df[units_df["status"] == "available"]
+        strategy = st.radio("Recommendation Strategy", ["Nearest team to target", "Highest priority team (best fuel + kits)"])
+        unit_types = {r["unit_id"]: ("helicopter" if r["unit_type"] == "helicopter" else "ground") for _, r in available.iterrows()}
+        rec = nearest_team_to_target(G, tgt, available.to_dict(orient="records"), events, unit_types) if strategy.startswith("Nearest") else {}
+        default_team = rec.get("team", {}).get("unit_id") if rec else available.iloc[0]["unit_id"]
+        team_id = st.selectbox("Select Team", available["unit_id"].tolist(), index=available["unit_id"].tolist().index(default_team))
+        team = available[available["unit_id"] == team_id].iloc[0]
 
-        crit = stats.get("critical_unscheduled", 0)
-        if crit:
-            st.error(f"Critical missions not scheduled: **{crit}**")
-
-        tl = sched.get_schedule_timeline()
-        rows = []
-        for uid, blocks in tl.items():
-            for b in blocks:
-                rows.append(
-                    {
-                        "Unit": uid,
-                        "Start": b["start_time"],
-                        "Finish": b["end_time"],
-                        "Mission": b["mission_id"],
-                        "Zone": b["zone"],
-                    }
+    with right:
+        unit_mode = "helicopter" if team["unit_type"] == "helicopter" else "ground"
+        out = select_and_run(G, team["current_node"], tgt, events, positions, city_data, unit_type=unit_mode)
+        df = pd.DataFrame(out["all_results"])
+        if not df.empty:
+            df["Air Route"] = df["used_air_edges"].map(lambda v: "AIR" if v else "Road")
+            st.dataframe(df[["Algorithm", "Path Found", "Path Length", "Nodes Explored", "Time (ms)", "Safety Score", "Air Route"]], use_container_width=True)
+            c1, c2, c3 = st.columns(3)
+            for col, c in [("Nodes Explored", c1), ("Time (ms)", c2), ("Path Length", c3)]:
+                fig = px.bar(df, x=col, y="Algorithm", orientation="h", template="plotly_dark")
+                c.plotly_chart(fig, use_container_width=True)
+            rec_path = out["recommended"]["path"]
+            hp = [{"path": rec_path, "color": "#2ecc71", "width": 4, "label": f"{out['recommended']['algorithm']} path", "dash": "solid", "show_steps": True}]
+            st.plotly_chart(build_city_map(city_data, highlight_paths=hp, show_labels=False), use_container_width=True)
+            st.caption(f"{out['recommended']['algorithm']} — {out['recommended']['why_selected']}")
+            override = st.selectbox("Use different algorithm", ["Recommended"] + df["Algorithm"].tolist())
+            selected_algo = out["recommended"]["algorithm"] if override == "Recommended" else override
+            btn = st.button(f"Dispatch {team['name']} via {selected_algo}")
+            if btn:
+                algo_row = next((r for r in out["all_results"] if r["Algorithm"] == selected_algo), out["recommended"])
+                path = algo_row["Path"] if "Path" in algo_row else out["recommended"]["path"]
+                result_meta = {
+                    "algorithm": selected_algo,
+                    "why_selected": out["recommended"]["why_selected"],
+                    "nodes_explored": int(algo_row.get("Nodes Explored", out["recommended"]["nodes_explored"])),
+                    "runtime_ms": float(algo_row.get("Time (ms)", out["recommended"]["runtime_ms"])),
+                    "used_air_edges": bool(algo_row.get("used_air_edges", out["recommended"]["used_air_edges"])),
+                }
+                mission = mm.create_mission(
+                    team.to_dict(),
+                    tgt,
+                    node_name[tgt],
+                    path,
+                    [node_name.get(n, n) for n in path],
+                    result_meta,
+                    int(victims[victims["id"] == tgt]["people_stranded"].iloc[0]),
+                    victims[victims["id"] == tgt]["injury_level"].iloc[0] if "injury_level" in victims else "high",
+                    city,
                 )
-        if rows:
-            tdf = pd.DataFrame(rows)
-            fig = px.timeline(
-                tdf,
-                x_start="Start",
-                x_end="Finish",
-                y="Unit",
-                color="Mission",
-                hover_data=["Zone"],
-            )
-            fig.update_layout(
-                title="Unit timelines",
-                paper_bgcolor="#020617",
-                plot_bgcolor="#0f172a",
-                font=dict(color="#e2e8f0"),
-                height=max(300, 80 * tdf["Unit"].nunique()),
-            )
-            st.plotly_chart(fig, use_container_width=True)
+                st.success(f"Mission {mission['mission_id']} created. Team {team['name']} dispatched to {node_name[tgt]}.")
+                st.rerun()
 
-    if st.button("Re-optimize after road block"):
-        missions2 = load_missions_from_disk()
-        sched2 = RescueScheduler(missions2, rescue_coordinator.load_units(), G=app_state.get_city_graph())
-        sched2.reoptimize()
-        st.session_state["_last_sched"] = sched2
-        st.success("Re-optimized.")
+    with st.expander("Knapsack Optimization — Prioritize Rescue Targets"):
+        intro = build_victim_list(city_data, victims["id"].tolist(), events)
+        cap = round(sum((r["capacity"] * (r["fuel_remaining"] / 100.0)) for _, r in units_df[units_df["status"] == "available"].iterrows()))
+        out = knapsack_01(intro, cap)
+        st.dataframe(pd.DataFrame(intro), use_container_width=True)
+        st.dataframe(pd.DataFrame(out["dp_table"]).style.background_gradient(cmap="Blues"), use_container_width=True)
+        st.dataframe(pd.DataFrame(out["selected"]), use_container_width=True)
+
+    with st.expander("Rescue Log"):
+        log_df = load_rescue_log_df()
+        st.dataframe(log_df, use_container_width=True)
+
+    if live:
+        time.sleep(5)
         st.rerun()
 
-    st.subheader("Safe zone capacity")
-    for z in safe:
-        cap = int(z.get("capacity", 1))
-        occ = int(z.get("current_occupancy", 0))
-        st.progress(min(1.0, occ / max(cap, 1)), text=f"{z['name']}: {occ} / {cap}")
-
-    st.subheader("Recent rescue log (last 20)")
-    df = rescue_coordinator.generate_rescue_report()
-    st.dataframe(df.tail(20), use_container_width=True)
-
-
-if __name__ == "__main__":
-    render()

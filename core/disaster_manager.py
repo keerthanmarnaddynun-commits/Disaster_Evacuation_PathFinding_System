@@ -1,199 +1,140 @@
-"""Block/unblock roads, spread disaster, risk scoring."""
-
 from __future__ import annotations
 
-import math
-import uuid
-from datetime import datetime, timezone
-from typing import Any
+from collections import deque
+from datetime import datetime
 
 import networkx as nx
 
-from core import data_loader, dstar_runtime, graph_engine
+
+_SEVERITY_MULT = {
+    "critical": 1.0,
+    "high": 0.75,
+    "medium": 0.5,
+    "low": 0.25,
+}
 
 
-def _norm_edge(u: str, v: str) -> tuple[str, str]:
+def _edge_key(u: str, v: str) -> tuple[str, str]:
     return (u, v) if u <= v else (v, u)
 
 
-def _events_list() -> list[dict]:
-    return data_loader.read_disaster_events()
-
-
-def _write_events(events: list[dict]) -> None:
-    data_loader.write_disaster_events(events)
-
-
-def collect_blocked_edges(events: list[dict] | None = None) -> set[tuple[str, str]]:
-    """All blocked undirected edge keys from active events."""
-    evs = events if events is not None else _events_list()
-    blocked: set[tuple[str, str]] = set()
-    for ev in evs:
-        if not ev.get("active", True):
+def get_all_blocked_edges(disaster_events) -> set[tuple]:
+    """
+    Return set of (u,v) tuples that are currently blocked (active events only).
+    """
+    out: set[tuple[str, str]] = set()
+    for e in disaster_events or []:
+        if not e.get("active", False):
             continue
-        for pair in ev.get("blocked_edges", []):
-            if len(pair) >= 2:
-                blocked.add(_norm_edge(str(pair[0]), str(pair[1])))
-    return blocked
+        for u, v in e.get("blocked_edges", []):
+            out.add(_edge_key(u, v))
+    return out
 
 
-def apply_blocked_to_graph(G: nx.Graph, events: list[dict] | None = None) -> nx.Graph:
-    """Return a copy of G with blocked edges removed."""
-    H = G.copy()
-    blocked = collect_blocked_edges(events)
-    for u, v in blocked:
-        if H.has_edge(u, v):
-            H.remove_edge(u, v)
-    return H
+def compute_risk_score(node_id, active_events, G) -> float:
+    """
+    0.0–1.0. Higher if node is in affected_nodes or adjacent to blocked_edges.
+    Severity multiplier: critical=1.0, high=0.75, medium=0.5, low=0.25.
+    """
+    events = [e for e in (active_events or []) if e.get("active", False)]
+    if not events:
+        return 0.0
+
+    base = 0.0
+    for e in events:
+        sev = str(e.get("severity", "low")).lower()
+        mult = _SEVERITY_MULT.get(sev, 0.25)
+
+        affected = set(e.get("affected_nodes", []))
+        if node_id in affected:
+            base = max(base, 1.0 * mult)
+
+        blocked = {tuple(pair) for pair in e.get("blocked_edges", [])}
+        # If node touches any blocked edge, it is at elevated risk.
+        for u, v in blocked:
+            if node_id == u or node_id == v:
+                base = max(base, 0.8 * mult)
+                break
+
+        # Adjacent to affected nodes: small bump
+        for a in affected:
+            if G is not None and G.has_node(node_id) and G.has_node(a) and G.has_edge(node_id, a):
+                base = max(base, 0.6 * mult)
+                break
+
+    return max(0.0, min(1.0, float(base)))
 
 
-def block_road(G: nx.Graph, u: str, v: str, event_id: str | None = None) -> str:
-    """Remove edge from G and append a synthetic block to disaster_events.json."""
-    remove_edge = _norm_edge(u, v)
-    if G.has_edge(u, v):
-        G.remove_edge(u, v)
-
-    events = _events_list()
-    eid = event_id or f"EVT-MANUAL-{uuid.uuid4().hex[:8]}"
-    found = False
-    for ev in events:
-        if ev.get("event_id") == eid:
-            be = ev.setdefault("blocked_edges", [])
-            if list(remove_edge) not in be and [remove_edge[0], remove_edge[1]] not in be:
-                be.append([remove_edge[0], remove_edge[1]])
-            found = True
-            break
-    if not found:
-        events.append(
-            {
-                "event_id": eid,
-                "type": "congestion",
-                "severity": "medium",
-                "affected_nodes": [],
-                "blocked_edges": [[remove_edge[0], remove_edge[1]]],
-                "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-                "active": True,
-            }
-        )
-    _write_events(events)
-    dstar_runtime.notify_edge_blocked(u, v)
-    return eid
-
-
-def unblock_road(G: nx.Graph, u: str, v: str) -> None:
-    """Restore edge from city_graph seed and remove block from all events."""
-    key = _norm_edge(u, v)
-    raw = data_loader.read_city_graph()
-    edge_data = None
-    for e in raw.get("edges", []):
-        eu, ev = e["source"], e["target"]
-        if _norm_edge(eu, ev) == key:
-            edge_data = e
-            break
-    if edge_data is None:
-        return
-
-    u0, v0 = edge_data["source"], edge_data["target"]
-    attrs = {
-        "distance_km": float(edge_data.get("distance_km", 1)),
-        "base_travel_time_min": float(edge_data.get("base_travel_time_min", 1)),
-        "capacity": float(edge_data.get("capacity", 500)),
-        "road_name": edge_data.get("road_name", ""),
-        "road_type": edge_data.get("road_type", "local"),
-        "bidirectional": edge_data.get("bidirectional", True),
-        "congestion_factor": float(edge_data.get("congestion_factor", 1.0)),
-    }
-    if not G.has_edge(u0, v0):
-        G.add_edge(u0, v0, **attrs)
-
-    events = _events_list()
-    for ev in events:
-        be = ev.get("blocked_edges", [])
-        new_be = [p for p in be if _norm_edge(str(p[0]), str(p[1])) != key]
-        ev["blocked_edges"] = new_be
-    _write_events(events)
-
-    evs = _events_list()
-    if G.has_edge(u0, v0):
-        w = graph_engine.get_edge_weight(G, u0, v0, "balanced", active_events=evs)
-        dstar_runtime.notify_edge_restored(u0, v0, w)
-
-
-def spread_disaster(
-    G: nx.Graph,
-    epicenter: str,
-    radius_km: float,
-    disaster_type: str,
-    *,
-    severity: str = "high",
-) -> str:
-    """Auto-block edges whose midpoint is within radius_km of epicenter coordinates."""
-    if epicenter not in G:
-        return ""
-
-    ex = float(G.nodes[epicenter].get("x", 0))
-    ey = float(G.nodes[epicenter].get("y", 0))
-
-    blocked_pairs: list[list[str]] = []
-    for u, v in list(G.edges()):
-        x1 = float(G.nodes[u].get("x", 0))
-        y1 = float(G.nodes[u].get("y", 0))
-        x2 = float(G.nodes[v].get("x", 0))
-        y2 = float(G.nodes[v].get("y", 0))
-        mx, my = (x1 + x2) / 2, (y1 + y2) / 2
-        dist = math.hypot(mx - ex, my - ey)
-        if dist <= radius_km:
-            blocked_pairs.append([u, v])
-
-    eid = f"EVT-SPREAD-{uuid.uuid4().hex[:8]}"
-    events = _events_list()
-    affected_nodes = [n for n in G.nodes() if math.hypot(float(G.nodes[n].get("x", 0)) - ex, float(G.nodes[n].get("y", 0)) - ey) <= radius_km]
-    events.append(
-        {
-            "event_id": eid,
-            "type": disaster_type,
-            "severity": severity,
-            "affected_nodes": affected_nodes[:20],
-            "blocked_edges": blocked_pairs,
-            "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+def block_road(u, v, reason, disaster_events) -> list:
+    """
+    Add edge to blocked_edges of most recent active event (or create new event).
+    Return updated disaster_events list.
+    """
+    events = list(disaster_events or [])
+    active = [e for e in events if e.get("active", False)]
+    if active:
+        target = active[-1]
+    else:
+        target = {
+            "event_id": f"EVT-{len(events) + 1:03d}",
+            "type": str(reason or "congestion"),
+            "severity": "low",
+            "affected_nodes": [],
+            "blocked_edges": [],
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
             "active": True,
         }
-    )
-    _write_events(events)
+        events.append(target)
 
-    for pair in blocked_pairs:
-        if G.has_edge(pair[0], pair[1]):
-            G.remove_edge(pair[0], pair[1])
-        dstar_runtime.notify_edge_blocked(pair[0], pair[1])
-
-    return eid
-
-
-def get_affected_zones(G: nx.Graph, event: dict[str, Any]) -> list[str]:
-    """Zones whose nodes intersect event affected_nodes."""
-    aff = set(event.get("affected_nodes", []))
-    zones: list[str] = []
-    raw_zones = data_loader.read_evacuation_zones()
-    for z in raw_zones:
-        zid = z.get("zone_id", "")
-        nodes = set(z.get("nodes", []))
-        if aff & nodes:
-            zones.append(zid)
-    return zones
+    blocked_edges = target.setdefault("blocked_edges", [])
+    pair = [u, v]
+    rev = [v, u]
+    if pair not in blocked_edges and rev not in blocked_edges:
+        blocked_edges.append(pair)
+    return events
 
 
-def compute_risk_score(node: str, active_events: list[dict]) -> float:
-    """0.0 safe .. 1.0 critical based on proximity to active disasters."""
-    risk = 0.0
-    for ev in active_events:
-        if not ev.get("active", True):
+def unblock_road(u, v, disaster_events) -> list:
+    """
+    Remove from all blocked_edges lists. Return updated list.
+    """
+    events = list(disaster_events or [])
+    for e in events:
+        be = e.get("blocked_edges", [])
+        e["blocked_edges"] = [pair for pair in be if not ({pair[0], pair[1]} == {u, v})]
+    return events
+
+
+def spread_disaster(G: nx.Graph, epicenter_node, radius_hops, disaster_type, severity) -> dict:
+    """
+    BFS from epicenter up to radius_hops. Block all edges within radius.
+    Return new disaster event dict.
+    """
+    radius = int(radius_hops)
+    visited = {epicenter_node: 0}
+    q = deque([epicenter_node])
+    affected_nodes: set[str] = {epicenter_node}
+    blocked: set[tuple[str, str]] = set()
+
+    while q:
+        node = q.popleft()
+        depth = visited[node]
+        if depth >= radius:
             continue
-        if node in ev.get("affected_nodes", []):
-            risk = max(risk, 0.85)
-        sev = str(ev.get("severity", "low")).lower()
-        sev_map = {"low": 0.15, "medium": 0.35, "high": 0.55, "critical": 0.75}
-        boost = sev_map.get(sev, 0.2)
-        for pair in ev.get("blocked_edges", []):
-            if len(pair) >= 2 and node in (pair[0], pair[1]):
-                risk = max(risk, 0.4 + boost * 0.3)
-    return min(1.0, risk)
+        for nbr in G.neighbors(node):
+            blocked.add(_edge_key(node, nbr))
+            if nbr not in visited:
+                visited[nbr] = depth + 1
+                affected_nodes.add(nbr)
+                q.append(nbr)
+
+    return {
+        "event_id": f"EVT-{datetime.now().strftime('%H%M%S')}",
+        "type": str(disaster_type).lower(),
+        "severity": str(severity).lower(),
+        "affected_nodes": sorted(affected_nodes),
+        "blocked_edges": [[u, v] for (u, v) in sorted(blocked)],
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "active": True,
+    }
+

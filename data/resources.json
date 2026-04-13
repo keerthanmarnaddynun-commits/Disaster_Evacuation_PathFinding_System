@@ -1,0 +1,98 @@
+{
+  "hub": {
+    "node_id": "N001",
+    "name": "Veridian City Central Hub",
+    "location": "Central District - Zone A",
+    "last_updated": "2024-01-15T08:00:00"
+  },
+  "inventory": [
+    {
+      "resource_id": "R001",
+      "name": "Food Packets",
+      "category": "food",
+      "total_stock": 5000,
+      "unit": "packets",
+      "distributed": 0,
+      "in_transit": 0
+    },
+    {
+      "resource_id": "R002",
+      "name": "Water",
+      "category": "water",
+      "total_stock": 8000,
+      "unit": "liters",
+      "distributed": 50,
+      "in_transit": 0
+    },
+    {
+      "resource_id": "R003",
+      "name": "Medical Kits",
+      "category": "medical",
+      "total_stock": 500,
+      "unit": "kits",
+      "distributed": 0,
+      "in_transit": 0
+    },
+    {
+      "resource_id": "R004",
+      "name": "Blankets",
+      "category": "shelter",
+      "total_stock": 2000,
+      "unit": "pieces",
+      "distributed": 0,
+      "in_transit": 0
+    },
+    {
+      "resource_id": "R005",
+      "name": "Rescue Boats",
+      "category": "equipment",
+      "total_stock": 20,
+      "unit": "units",
+      "distributed": 0,
+      "in_transit": 0
+    },
+    {
+      "resource_id": "R006",
+      "name": "Emergency Medicines",
+      "category": "medical",
+      "total_stock": 300,
+      "unit": "kits",
+      "distributed": 0,
+      "in_transit": 0
+    }
+  ],
+  "safe_zone_allocations": [
+    {
+      "allocation_id": "ALC-D473F4AC",
+      "resource_id": "R002",
+      "resource_name": "Water",
+      "quantity": 50,
+      "unit": "liters",
+      "safe_zone_id": "SZ-01",
+      "safe_zone_name": "North Safe Center",
+      "status": "delivered",
+      "dispatched_at": "2026-04-13T12:50:49",
+      "delivered_at": "2026-04-13T12:50:57"
+    }
+  ],
+  "distribution_log": [
+    {
+      "time": "2026-04-13T12:50:49",
+      "action": "dispatch",
+      "resource_id": "R002",
+      "resource_name": "Water",
+      "quantity": 50,
+      "safe_zone_id": "SZ-01",
+      "safe_zone_name": "North Safe Center"
+    },
+    {
+      "time": "2026-04-13T12:50:57",
+      "action": "delivered",
+      "resource_id": "R002",
+      "resource_name": "Water",
+      "quantity": 50,
+      "safe_zone_id": "SZ-01",
+      "safe_zone_name": "North Safe Center"
+    }
+  ]
+}

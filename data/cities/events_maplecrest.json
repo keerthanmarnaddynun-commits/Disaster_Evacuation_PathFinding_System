@@ -1,0 +1,5 @@
+[
+  {"event_id":"EVT-001","type":"landslide","severity":"high","affected_nodes":["N010","N011"],"blocked_edges":[["N010","N011"]],"timestamp":"2026-04-13T08:20:00","active":true},
+  {"event_id":"EVT-002","type":"earthquake","severity":"critical","affected_nodes":["N005","N006","N018"],"blocked_edges":[["N005","N006"],["N017","N018"]],"timestamp":"2026-04-13T08:50:00","active":true},
+  {"event_id":"EVT-003","type":"congestion","severity":"medium","affected_nodes":["N021","N022","N023"],"blocked_edges":[["N021","N022"]],"timestamp":"2026-04-13T09:10:00","active":true}
+]

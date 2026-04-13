@@ -1,0 +1,12 @@
+[
+  {"unit_id":"U001","name":"Alpha-1","unit_type":"ambulance","base_node":"N003","capacity":10,"speed_kmph":60,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N003","total_rescued":0,"dispatches":[]},
+  {"unit_id":"U002","name":"Alpha-2","unit_type":"ambulance","base_node":"N016","capacity":10,"speed_kmph":60,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N016","total_rescued":0,"dispatches":[]},
+  {"unit_id":"U003","name":"Alpha-3","unit_type":"ambulance","base_node":"N025","capacity":10,"speed_kmph":60,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N025","total_rescued":0,"dispatches":[]},
+  {"unit_id":"U004","name":"Bravo-1","unit_type":"fire_truck","base_node":"N006","capacity":5,"speed_kmph":50,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N006","total_rescued":0,"dispatches":[]},
+  {"unit_id":"U005","name":"Bravo-2","unit_type":"fire_truck","base_node":"N019","capacity":5,"speed_kmph":50,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N019","total_rescued":0,"dispatches":[]},
+  {"unit_id":"U006","name":"Bravo-3","unit_type":"fire_truck","base_node":"N024","capacity":5,"speed_kmph":50,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N024","total_rescued":0,"dispatches":[]},
+  {"unit_id":"U007","name":"Charlie-1","unit_type":"police","base_node":"N009","capacity":8,"speed_kmph":70,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N009","total_rescued":0,"dispatches":[]},
+  {"unit_id":"U008","name":"Charlie-2","unit_type":"police","base_node":"N022","capacity":8,"speed_kmph":70,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N022","total_rescued":0,"dispatches":[]},
+  {"unit_id":"H001","name":"Heli-1","unit_type":"helicopter","base_node":"N001","capacity":15,"speed_kmph":200,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N001","total_rescued":0,"dispatches":[]},
+  {"unit_id":"H002","name":"Heli-2","unit_type":"helicopter","base_node":"N001","capacity":15,"speed_kmph":200,"icon":"","fuel_capacity":100,"fuel_remaining":100,"medical_kits":5,"status":"available","current_node":"N001","total_rescued":0,"dispatches":[]}
+]

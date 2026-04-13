@@ -1,13 +1,13 @@
 [
   {
     "id": "SZ-01",
-    "name": "North Evacuation Center",
+    "name": "North Safe Center",
     "node_id": "N007",
     "capacity": 5000,
     "current_occupancy": 0,
     "resources": {
       "food_packets": 0,
-      "water_liters": 0,
+      "water_liters": 50,
       "medical_kits": 0,
       "blankets": 0,
       "rescue_boats": 0,
@@ -60,4 +60,3 @@
     }
   }
 ]
-

@@ -1,0 +1,66 @@
+[
+  {
+    "event_id": "EVT-001",
+    "type": "flood",
+    "severity": "critical",
+    "affected_nodes": [
+      "N004",
+      "N005",
+      "N006"
+    ],
+    "blocked_edges": [
+      [
+        "N004",
+        "N005"
+      ],
+      [
+        "N005",
+        "N006"
+      ]
+    ],
+    "timestamp": "2026-04-13T08:40:00",
+    "active": false,
+    "resolved_at": "2026-04-13T12:51:55"
+  },
+  {
+    "event_id": "EVT-002",
+    "type": "congestion",
+    "severity": "high",
+    "affected_nodes": [
+      "N008",
+      "N009",
+      "N010",
+      "N011"
+    ],
+    "blocked_edges": [
+      [
+        "N008",
+        "N009"
+      ],
+      [
+        "N009",
+        "N010"
+      ]
+    ],
+    "timestamp": "2026-04-13T09:00:00",
+    "active": false,
+    "resolved_at": "2026-04-13T12:51:53"
+  },
+  {
+    "event_id": "EVT-003",
+    "type": "fire",
+    "severity": "medium",
+    "affected_nodes": [
+      "N023"
+    ],
+    "blocked_edges": [
+      [
+        "N022",
+        "N023"
+      ]
+    ],
+    "timestamp": "2026-04-13T09:30:00",
+    "active": false,
+    "resolved_at": "2026-04-13T12:51:50"
+  }
+]

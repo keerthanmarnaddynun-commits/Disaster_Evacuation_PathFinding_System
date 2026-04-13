@@ -1,38 +1,26 @@
-"""Atomic read/write for JSON and CSV under data/."""
-
 from __future__ import annotations
 
-import csv
 import json
 import os
 import tempfile
 from pathlib import Path
 from typing import Any
 
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = _PROJECT_ROOT / "data"
+import pandas as pd
 
-
-def _atomic_write_json(path: Path, data: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_path = tempfile.mkstemp(dir=path.parent, prefix=".tmp_", suffix=".json")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(tmp_path, path)
-    except Exception:
-        try:
-            os.unlink(tmp_path)
-        except OSError:
-            pass
-        raise
+_ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = _ROOT / "data"
+CITIES_DIR = DATA_DIR / "cities"
+CITY_MAP = {
+    "Veridian City": "veridian",
+    "Harborfield": "harborfield",
+    "Maplecrest": "maplecrest",
+}
 
 
 def _atomic_write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_path = tempfile.mkstemp(dir=path.parent, prefix=".tmp_", suffix=".csv")
+    fd, tmp_path = tempfile.mkstemp(dir=path.parent, prefix=".tmp_", suffix=path.suffix or ".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="") as f:
             f.write(content)
@@ -47,89 +35,128 @@ def _atomic_write_text(path: Path, content: str) -> None:
         raise
 
 
-def read_json(filename: str) -> Any:
-    path = DATA_DIR / filename
+def _atomic_write_json(path: Path, data: Any) -> None:
+    content = json.dumps(data, indent=2, ensure_ascii=False)
+    _atomic_write_text(path, content + "\n")
+
+
+def _read_json(path: Path) -> Any:
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
-def write_json(filename: str, data: Any) -> None:
-    _atomic_write_json(DATA_DIR / filename, data)
+def _city_slug(city: str) -> str:
+    return CITY_MAP.get(city, "veridian")
 
 
-def write_json_path(path: str | Path, data: Any) -> None:
-    _atomic_write_json(Path(path), data)
+def _city_file(prefix: str, city: str) -> Path:
+    return CITIES_DIR / f"{prefix}_{_city_slug(city)}.json"
 
 
-def read_city_graph() -> dict[str, Any]:
-    return read_json("city_graph.json")
+def load_city_graph(city: str = "Veridian City") -> dict:
+    return _read_json(_city_file("city", city))
 
 
-def read_evacuation_zones() -> list[dict]:
-    return read_json("evacuation_zones.json")
+def save_city_graph(data, city: str = "Veridian City") -> None:
+    _atomic_write_json(_city_file("city", city), data)
 
 
-def read_safe_zones() -> list[dict]:
-    return read_json("safe_zones.json")
+def load_safe_zones(city: str = "Veridian City") -> list:
+    return _read_json(_city_file("safe_zones", city))
 
 
-def read_disaster_events() -> list[dict]:
-    return read_json("disaster_events.json")
+def load_safe_zones_df(city: str = "Veridian City") -> pd.DataFrame:
+    return pd.DataFrame(load_safe_zones(city))
 
 
-def write_disaster_events(events: list[dict]) -> None:
-    write_json("disaster_events.json", events)
+def save_safe_zones(data, city: str = "Veridian City") -> None:
+    _atomic_write_json(_city_file("safe_zones", city), data)
 
 
-def read_rescue_units() -> list[dict]:
-    return read_json("rescue_units.json")
+def load_disaster_events(city: str = "Veridian City") -> list:
+    return _read_json(_city_file("events", city))
 
 
-def write_rescue_units(units: list[dict]) -> None:
-    write_json("rescue_units.json", units)
+def load_disaster_events_df(city: str = "Veridian City") -> pd.DataFrame:
+    return pd.DataFrame(load_disaster_events(city))
 
 
-def read_rescue_missions() -> list[dict[str, Any]]:
-    path = DATA_DIR / "rescue_missions.json"
-    if not path.exists():
-        return []
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
+def save_disaster_events(data, city: str = "Veridian City") -> None:
+    _atomic_write_json(_city_file("events", city), data)
 
 
-def write_rescue_missions(missions: list[dict[str, Any]]) -> None:
-    write_json("rescue_missions.json", missions)
+def load_rescue_units(city: str = "Veridian City") -> list:
+    return _read_json(_city_file("units", city))
 
 
-def read_rescue_log_rows() -> list[dict[str, str]]:
+def save_rescue_units(data, city: str = "Veridian City") -> None:
+    _atomic_write_json(_city_file("units", city), data)
+
+
+def load_rescue_units_df(city: str = "Veridian City") -> pd.DataFrame:
+    return pd.DataFrame(load_rescue_units(city))
+
+
+def load_resources() -> dict:
+    return _read_json(DATA_DIR / "resources.json")
+
+
+def save_resources(data) -> None:
+    _atomic_write_json(DATA_DIR / "resources.json", data)
+
+
+def load_evacuation_zones(city: str = "Veridian City") -> list:
+    return _read_json(_city_file("zones", city))
+
+def load_evacuation_zones_df(city: str = "Veridian City") -> pd.DataFrame:
+    return pd.DataFrame(load_evacuation_zones(city))
+
+
+RESCUE_LOG_COLUMNS = [
+    "log_id",
+    "timestamp",
+    "city",
+    "team_id",
+    "team_name",
+    "team_type",
+    "from_node",
+    "from_name",
+    "to_node",
+    "to_name",
+    "algorithm_used",
+    "path_length",
+    "nodes_explored",
+    "time_ms",
+    "people_rescued",
+    "fuel_used",
+    "medical_kits_used",
+    "knapsack_selected",
+    "status",
+]
+
+
+def load_rescue_log_df() -> pd.DataFrame:
     path = DATA_DIR / "rescue_log.csv"
     if not path.exists():
-        return []
-    with open(path, encoding="utf-8", newline="") as f:
-        return list(csv.DictReader(f))
+        return pd.DataFrame(columns=RESCUE_LOG_COLUMNS)
+    df = pd.read_csv(path)
+    for col in RESCUE_LOG_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    return df[RESCUE_LOG_COLUMNS]
 
 
-def append_rescue_log_row(row: dict[str, Any]) -> None:
+def save_rescue_log_df(df: pd.DataFrame) -> None:
     path = DATA_DIR / "rescue_log.csv"
-    fieldnames = [
-        "log_id",
-        "timestamp",
-        "zone",
-        "algorithm_used",
-        "path",
-        "total_cost",
-        "people_evacuated",
-        "rescue_unit",
-        "status",
-    ]
-    rows = read_rescue_log_rows()
-    rows.append({k: str(row.get(k, "")) for k in fieldnames})
+    path.parent.mkdir(parents=True, exist_ok=True)
+    for col in RESCUE_LOG_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+
     fd, tmp_path = tempfile.mkstemp(dir=path.parent, prefix=".tmp_", suffix=".csv")
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=fieldnames)
-            w.writeheader()
-            w.writerows(rows)
+            df[RESCUE_LOG_COLUMNS].to_csv(f, index=False)
             f.flush()
             os.fsync(f.fileno())
         os.replace(tmp_path, path)
@@ -141,18 +168,8 @@ def append_rescue_log_row(row: dict[str, Any]) -> None:
         raise
 
 
-def write_safe_zones(zones: list[dict]) -> None:
-    write_json("safe_zones.json", zones)
+def append_rescue_log(row: dict[str, Any]) -> None:
+    df = load_rescue_log_df()
+    df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+    save_rescue_log_df(df)
 
-
-def next_log_id() -> str:
-    rows = read_rescue_log_rows()
-    best = 0
-    for r in rows:
-        lid = r.get("log_id", "")
-        if lid.startswith("LOG-"):
-            try:
-                best = max(best, int(lid.split("-", 1)[1]))
-            except (IndexError, ValueError):
-                pass
-    return f"LOG-{best + 1:03d}"

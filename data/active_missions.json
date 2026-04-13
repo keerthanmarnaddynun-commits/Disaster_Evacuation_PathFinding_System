@@ -1,0 +1,37 @@
+{
+  "missions": [
+    {
+      "mission_id": "M1776072440",
+      "city": "Veridian City",
+      "team_id": "U007",
+      "team_name": "Charlie-1",
+      "team_type": "police",
+      "target_node": "N009",
+      "target_name": "Canal Gate",
+      "path": [
+        "N009"
+      ],
+      "path_names": [
+        "Canal Gate"
+      ],
+      "original_path_length": 0,
+      "current_step": 0,
+      "algorithm_used": "UCS",
+      "why_selected": "Lowest composite score across time, exploration count, path length, and safety.",
+      "total_path_length": 0,
+      "nodes_explored": 1,
+      "time_ms": 0.00045900014811195433,
+      "people_at_target": 230,
+      "injury_level": "high",
+      "status": "en_route",
+      "dispatched_at": "2026-04-13T14:57:20",
+      "arrived_at": null,
+      "rescued_at": null,
+      "completed_at": null,
+      "fuel_used": 0,
+      "used_air_edges": false,
+      "replanned": false,
+      "original_algorithm": "UCS"
+    }
+  ]
+}
