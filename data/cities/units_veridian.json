@@ -8,11 +8,11 @@
     "speed_kmph": 60,
     "icon": "",
     "fuel_capacity": 100,
-    "fuel_remaining": 100,
-    "medical_kits": 5,
-    "status": "available",
+    "fuel_remaining": 40,
+    "medical_kits": 0,
+    "status": "dispatched",
     "current_node": "N003",
-    "total_rescued": 0,
+    "total_rescued": 1800,
     "dispatches": []
   },
   {
@@ -56,11 +56,11 @@
     "speed_kmph": 50,
     "icon": "",
     "fuel_capacity": 100,
-    "fuel_remaining": 100,
-    "medical_kits": 5,
-    "status": "available",
+    "fuel_remaining": 96,
+    "medical_kits": 3,
+    "status": "dispatched",
     "current_node": "N006",
-    "total_rescued": 0,
+    "total_rescued": 260,
     "dispatches": []
   },
   {
@@ -105,10 +105,10 @@
     "icon": "",
     "fuel_capacity": 100,
     "fuel_remaining": 100,
-    "medical_kits": 5,
+    "medical_kits": 3,
     "status": "dispatched",
     "current_node": "N009",
-    "total_rescued": 0,
+    "total_rescued": 460,
     "dispatches": []
   },
   {
@@ -136,11 +136,11 @@
     "speed_kmph": 200,
     "icon": "",
     "fuel_capacity": 100,
-    "fuel_remaining": 100,
-    "medical_kits": 5,
-    "status": "available",
+    "fuel_remaining": 80,
+    "medical_kits": 3,
+    "status": "dispatched",
     "current_node": "N001",
-    "total_rescued": 0,
+    "total_rescued": 560,
     "dispatches": []
   },
   {

@@ -25,4 +25,20 @@ LOG-2218bd25,2026-04-13T14:28:39,Veridian City,U003,Alpha-3,ambulance,N025,N025,
 LOG-c6c40852,2026-04-13T14:28:39,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.00045799970394,90,0,1,True,dispatched
 LOG-946e9d8a,2026-04-13T14:28:39,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0004590001481119,90,0,1,True,dispatched
 LOG-b412b563,2026-04-13T14:29:51,Veridian City,U002,Alpha-2,ambulance,N016,N016,N016,N016,DFS,0,1,0.0005830006557516,120,0,1,True,dispatched
-LOG-e56b0a8e,2026-04-13T14:30:14,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0003749992174562067,90,0,1,True,dispatched
+LOG-e56b0a8e,2026-04-13T14:30:14,Veridian City,U003,Alpha-3,ambulance,N025,N025,N025,N025,DFS,0,1,0.0003749992174562,90,0,1,True,dispatched
+LOG-M1776179902,2026-04-14T20:49:18,Veridian City,U001,Alpha-1,ambulance,N003,Civic Loop,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776179902,2026-04-14T20:50:49,Veridian City,U001,Alpha-1,ambulance,N006,Downtown Shelter,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776179902,2026-04-14T20:52:24,Veridian City,U001,Alpha-1,ambulance,N003,Civic Loop,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776179902,2026-04-14T20:52:31,Veridian City,U001,Alpha-1,ambulance,N006,Downtown Shelter,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776072440,2026-04-14T20:57:27,Veridian City,U007,Charlie-1,police,N009,Canal Gate,N009,Canal Gate,UCS,0,1,0.0004590001481119,230,0,1,False,rescued
+LOG-M1776179902,2026-04-14T20:57:43,Veridian City,U001,Alpha-1,ambulance,N003,Civic Loop,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776179902,2026-04-14T20:57:52,Veridian City,U001,Alpha-1,ambulance,N006,Downtown Shelter,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776072440,2026-04-14T20:57:57,Veridian City,U007,Charlie-1,police,N009,Canal Gate,N009,Canal Gate,UCS,0,1,0.0004590001481119,230,0,1,False,rescued
+LOG-M1776180494,2026-04-14T20:58:32,Veridian City,H001,Heli-1,helicopter,N001,Central Square,N011,Quayside Market,Dijkstra,5,6,0.036750003346242,280,10,1,False,rescued
+LOG-M1776180494,2026-04-14T20:58:39,Veridian City,H001,Heli-1,helicopter,N011,Quayside Market,N011,Quayside Market,Dijkstra,5,6,0.036750003346242,280,10,1,False,rescued
+LOG-M1776179902,2026-04-15T17:23:11,Veridian City,U001,Alpha-1,ambulance,N003,Civic Loop,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776179902,2026-04-15T17:23:16,Veridian City,U001,Alpha-1,ambulance,N006,Downtown Shelter,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776179902,2026-04-15T17:24:30,Veridian City,U001,Alpha-1,ambulance,N003,Civic Loop,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776179902,2026-04-15T17:24:35,Veridian City,U001,Alpha-1,ambulance,N006,Downtown Shelter,N006,Downtown Shelter,UCS,3,4,0.0170409912243485,180,6,1,False,rescued
+LOG-M1776254423,2026-04-15T17:30:30,Veridian City,U004,Bravo-1,fire_truck,N006,Downtown Shelter,N012,North Bridge,UCS,1,2,0.0045000051613897,130,2,1,False,rescued
+LOG-M1776254423,2026-04-15T17:30:34,Veridian City,U004,Bravo-1,fire_truck,N012,North Bridge,N012,North Bridge,UCS,1,2,0.0045000051613897085,130,2,1,False,rescued

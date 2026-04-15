@@ -70,7 +70,7 @@
       "zone": "Zone-A",
       "elevation": 21,
       "population_density": 420,
-      "people_stranded": 180,
+      "people_stranded": 0,
       "helipad": true
     },
     {
@@ -106,7 +106,7 @@
       "zone": "Zone-B",
       "elevation": 17,
       "population_density": 460,
-      "people_stranded": 230,
+      "people_stranded": 0,
       "helipad": false
     },
     {
@@ -130,7 +130,7 @@
       "zone": "Zone-B",
       "elevation": 15,
       "population_density": 520,
-      "people_stranded": 280,
+      "people_stranded": 0,
       "helipad": false
     },
     {
@@ -142,7 +142,7 @@
       "zone": "Zone-B",
       "elevation": 16,
       "population_density": 280,
-      "people_stranded": 130,
+      "people_stranded": 0,
       "helipad": false
     },
     {
