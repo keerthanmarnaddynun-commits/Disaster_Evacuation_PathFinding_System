@@ -11,6 +11,8 @@ from core.disaster_manager import compute_risk_score, get_all_blocked_edges
 from core.mission_manager import MissionManager
 from utils.visualizer import build_city_map
 
+MAP_NAME = {"Veridian City": "Map 1", "Harborfield": "Map 2", "Maplecrest": "Map 3"}
+
 
 def _risk_badge(level: str) -> str:
     level = (level or "").lower()
@@ -48,15 +50,15 @@ def render():
     cols = st.columns(3)
     for i, opt in enumerate(["Veridian City", "Harborfield", "Maplecrest"]):
         with cols[i]:
-            if st.button(opt, use_container_width=True, type="primary" if opt == active_city else "secondary"):
+            if st.button(MAP_NAME.get(opt, opt), use_container_width=True, type="primary" if opt == active_city else "secondary"):
                 st.session_state["active_city"] = opt
                 st.rerun()
 
     st.markdown(
         f"""
         <div style="margin-bottom: 0.75rem;">
-          <div style="font-size:2rem;font-weight:700;color:#ffffff;">{active_city} - Disaster Command Center</div>
-          <div style="color:#a0a8c0;">{datetime.now().strftime("%A, %b %d %Y • %H:%M:%S")}</div>
+          <div style="font-size:2rem;font-weight:700;color:#ffffff;">{MAP_NAME.get(active_city, active_city)} - Disaster Command Center</div>
+        <div style="color:#d8dee9;">{datetime.now().strftime("%A, %b %d %Y • %H:%M:%S")}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -77,9 +79,9 @@ def render():
         st.plotly_chart(fig, use_container_width=True)
 
     with right:
-        st.markdown('<div style="font-size:1.1rem;font-weight:600;color:#4f8ef7;">Active Disaster Events</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:1.1rem;font-weight:600;color:#88c0d0;">Active Disaster Events</div>', unsafe_allow_html=True)
         if not active_events:
-            st.markdown('<div class="card" style="color:#a0a8c0;">No active disasters</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card" style="color:#d8dee9;">No active disasters</div>', unsafe_allow_html=True)
         for e in active_events:
             sev = str(e.get("severity", "low")).lower()
             sev_badge = (
@@ -98,7 +100,7 @@ def render():
                     <div style="font-weight:700;color:#ffffff;">{str(e.get("type")).title()}</div>
                     <div>{sev_badge}</div>
                   </div>
-                  <div style="margin-top:0.5rem;color:#a0a8c0;">
+                  <div style="margin-top:0.5rem;color:#d8dee9;">
                     Affected nodes: <b style="color:#ffffff;">{len(e.get("affected_nodes", []))}</b><br/>
                     Blocked roads: <b style="color:#ffffff;">{len(e.get("blocked_edges", []))}</b><br/>
                     Timestamp: {e.get("timestamp","")}
@@ -108,7 +110,7 @@ def render():
                 unsafe_allow_html=True,
             )
 
-    st.markdown('<div style="margin-top:0.75rem;font-size:1.1rem;font-weight:600;color:#4f8ef7;">Zone Risk Table</div>', unsafe_allow_html=True)
+    st.markdown('<div style="margin-top:0.75rem;font-size:1.1rem;font-weight:600;color:#88c0d0;">Zone Risk Table</div>', unsafe_allow_html=True)
     mm = MissionManager()
     mission_rows = [m for m in mm.load() if m.get("city") == active_city and m.get("status") != "complete"]
     if mission_rows:
@@ -119,7 +121,7 @@ def render():
                 st.markdown(f"**{m['team_name']}**  \n{m['status']}  \nTarget: {m['target_node']}  \nStep {m['current_step']}/{max(1, len(m['path'])-1)}")
                 if st.button("View Mission", key=f"vm_{m['mission_id']}"):
                     st.session_state["nav_to"] = "Rescue Operations"
-        palette = ["#2ecc71", "#f39c12", "#9b59b6", "#4f8ef7", "#e74c3c"]
+        palette = ["#8fbcbb", "#88c0d0", "#81a1c1", "#5e81ac", "#bf616a"]
         highlight = []
         for i, m in enumerate(mission_rows):
             highlight.append({"path": m["path"], "color": palette[i % len(palette)], "width": 3, "label": m["mission_id"], "dash": "solid", "show_steps": False})

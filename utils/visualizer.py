@@ -11,7 +11,6 @@ TYPE_STYLES = {
     "intersection": {"color": "#9aa0aa", "symbol": "circle", "size": 10},
 }
 
-
 def build_city_map(
     city_graph_data,
     highlight_paths=None,
@@ -134,8 +133,9 @@ def build_city_map(
         sizes.append(base_size)
         colors.append(style["color"])
         symbols.append(style["symbol"])
-        hovers.append(f"<b>{n.get('name', nid)}</b><br>Type: {nt}<br>People stranded: {int(n.get('people_stranded', 0))}")
-        texts.append(nid if show_labels else "")
+        label = nid
+        hovers.append(f"<b>{label}</b><br>Node: {nid}<br>Type: {nt}<br>People stranded: {int(n.get('people_stranded', 0))}")
+        texts.append(label if show_labels else "")
 
     fig.add_trace(
         go.Scatter(
@@ -180,7 +180,7 @@ def build_city_map(
             acol.append(color)
             asymbols.append("diamond" if mode == "air" else "star")
             alabels.append("AIR" if mode == "air" else "")
-            ahover.append(f"{unit_id}<br>At: {nodes.get(node_id, {}).get('name', node_id)}")
+            ahover.append(f"{unit_id}<br>At: {node_id}")
 
         if ax:
             fig.add_trace(

@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-from core.data_loader import load_city_graph, load_disaster_events, load_rescue_units_df, save_disaster_events
+from core.data_loader import load_city_graph, load_disaster_events, load_rescue_units_df, save_city_graph, save_disaster_events
 from core.mission_manager import MissionManager
 from core.graph_engine import load_graph
 from core.disaster_manager import spread_disaster, block_road, unblock_road, get_all_blocked_edges
@@ -24,7 +24,7 @@ def render():
     active_events = [e for e in events if e.get("active", True)]
     blocked = get_all_blocked_edges(events)
 
-    node_id_to_name = {n["id"]: n.get("name", n["id"]) for n in city.get("nodes", [])}
+    node_id_to_name = {n["id"]: n["id"] for n in city.get("nodes", [])}
     st.markdown(f"Active city: {active_city}")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Active Disasters", len(active_events))
@@ -34,7 +34,9 @@ def render():
     st.plotly_chart(build_city_map(city, blocked_edges=blocked, show_labels=False), use_container_width=True)
 
     st.markdown("### Simulate New Disaster")
-    dtype = st.selectbox("Disaster Type", ["Flood", "Earthquake", "Fire", "Landslide", "Congestion"], key="disaster_type")
+    form_left, form_right = st.columns([0.66, 0.34], gap="large")
+    with form_left:
+        dtype = st.selectbox("Disaster Type", ["Flood", "Earthquake", "Fire", "Landslide", "Congestion"], key="disaster_type")
     desc = {
         "Flood": "Blocks low-elevation roads and bridge nodes. Spreads along water paths.",
         "Earthquake": "Randomly blocks roads within radius. May isolate bridge nodes.",
@@ -42,16 +44,18 @@ def render():
         "Landslide": "Blocks mountain or elevated roads. Can isolate nodes completely.",
         "Congestion": "Increases travel time on arterial and highway roads in the area.",
     }
-    st.caption(desc[dtype])
-    epicenter = st.selectbox(
-        "Epicenter Node",
-        [n["id"] for n in city.get("nodes", [])],
-        format_func=lambda x: f"{x} - {node_id_to_name[x]}",
-        key="epicenter_node",
-    )
-    severity = st.select_slider("Severity", ["Low", "Medium", "High", "Critical"], value="High", key="disaster_severity")
-    radius = st.slider("Affected area radius", 1, 5, 2, key="disaster_radius")
-    preview = st.checkbox("Preview affected area before triggering", key="preview_disaster")
+    with form_left:
+        st.caption(desc[dtype])
+        epicenter = st.selectbox(
+            "Epicenter Node",
+            [n["id"] for n in city.get("nodes", [])],
+            format_func=lambda x: f"{x} - {node_id_to_name[x]}",
+            key="epicenter_node",
+        )
+    with form_right:
+        severity = st.select_slider("Severity", ["Low", "Medium", "High", "Critical"], value="High", key="disaster_severity")
+        radius = st.slider("Affected radius", 1, 5, 2, key="disaster_radius")
+        preview = st.checkbox("Preview before triggering", key="preview_disaster")
     if preview:
         preview_event = spread_disaster(G, epicenter, radius, dtype.lower(), severity.lower())
         st.plotly_chart(build_city_map(city, blocked_edges=blocked, isolated_nodes=preview_event["affected_nodes"], show_labels=False), use_container_width=True)
@@ -79,6 +83,35 @@ def render():
             f"{len(new_ev.get('affected_nodes', []))} nodes affected"
         )
         st.rerun()
+
+    st.markdown("### Stranded Population Control")
+    active_affected_nodes = sorted({nid for e in active_events for nid in e.get("affected_nodes", [])})
+    if not active_affected_nodes:
+        st.info("No active disaster nodes. Trigger a disaster first, then set stranded people.")
+    else:
+        node_map = {n["id"]: n for n in city.get("nodes", [])}
+        changed = False
+        for nid in active_affected_nodes:
+            node = node_map.get(nid, {})
+            cur = int(node.get("people_stranded", 0))
+            row_left, row_right = st.columns([0.68, 0.32], gap="small")
+            row_left.markdown(f"**{node_id_to_name.get(nid, nid)}** (`{nid}`)")
+            with row_right:
+                new_val = st.slider(
+                    "Stranded",
+                    min_value=0,
+                    max_value=1000,
+                    value=cur,
+                    step=10,
+                    key=f"stranded_{nid}",
+                    label_visibility="collapsed",
+                )
+            if new_val != cur:
+                node["people_stranded"] = int(new_val)
+                changed = True
+        if changed:
+            save_city_graph(city, active_city)
+            st.toast("Stranded population updated.")
 
     st.markdown("### Active Disasters")
     for i, ev in enumerate(active_events):

@@ -1,6 +1,117 @@
 [
-  {"id":"SZ-01","name":"North Safe Zone","node_id":"N007","capacity":4200,"current_occupancy":0,"resources":{"food_packets":0,"water_liters":0,"medical_kits":0,"blankets":0,"rescue_boats":0,"emergency_medicines":0}},
-  {"id":"SZ-02","name":"East Safe Zone","node_id":"N014","capacity":4300,"current_occupancy":0,"resources":{"food_packets":0,"water_liters":0,"medical_kits":0,"blankets":0,"rescue_boats":0,"emergency_medicines":0}},
-  {"id":"SZ-03","name":"South Safe Zone","node_id":"N020","capacity":4400,"current_occupancy":0,"resources":{"food_packets":0,"water_liters":0,"medical_kits":0,"blankets":0,"rescue_boats":0,"emergency_medicines":0}},
-  {"id":"SZ-04","name":"Hill Safe Zone","node_id":"N027","capacity":4100,"current_occupancy":0,"resources":{"food_packets":0,"water_liters":0,"medical_kits":0,"blankets":0,"rescue_boats":0,"emergency_medicines":0}}
+  {
+    "id": "SZ-01",
+    "name": "N005",
+    "node_id": "N005",
+    "capacity": 4200,
+    "current_occupancy": 0,
+    "resources": {
+      "food_packets": 0,
+      "water_liters": 0,
+      "medical_kits": 0,
+      "blankets": 0,
+      "rescue_boats": 0,
+      "emergency_medicines": 0
+    },
+    "victims": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "recovered": 0,
+      "total": 0
+    }
+  },
+  {
+    "id": "SZ-02",
+    "name": "N010",
+    "node_id": "N010",
+    "capacity": 4300,
+    "current_occupancy": 0,
+    "resources": {
+      "food_packets": 0,
+      "water_liters": 0,
+      "medical_kits": 0,
+      "blankets": 0,
+      "rescue_boats": 0,
+      "emergency_medicines": 0
+    },
+    "victims": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "recovered": 0,
+      "total": 0
+    }
+  },
+  {
+    "id": "SZ-03",
+    "name": "N015",
+    "node_id": "N015",
+    "capacity": 4400,
+    "current_occupancy": 0,
+    "resources": {
+      "food_packets": 0,
+      "water_liters": 0,
+      "medical_kits": 0,
+      "blankets": 0,
+      "rescue_boats": 0,
+      "emergency_medicines": 0
+    },
+    "victims": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "recovered": 0,
+      "total": 0
+    }
+  },
+  {
+    "id": "SZ-04",
+    "name": "N020",
+    "node_id": "N020",
+    "capacity": 4100,
+    "current_occupancy": 0,
+    "resources": {
+      "food_packets": 0,
+      "water_liters": 0,
+      "medical_kits": 0,
+      "blankets": 0,
+      "rescue_boats": 0,
+      "emergency_medicines": 0
+    },
+    "victims": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "recovered": 0,
+      "total": 0
+    }
+  },
+  {
+    "id": "SZ-05",
+    "name": "N025",
+    "node_id": "N025",
+    "capacity": 4000,
+    "current_occupancy": 0,
+    "resources": {
+      "food_packets": 0,
+      "water_liters": 0,
+      "medical_kits": 0,
+      "blankets": 0,
+      "rescue_boats": 0,
+      "emergency_medicines": 0
+    },
+    "victims": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "recovered": 0,
+      "total": 0
+    }
+  }
 ]

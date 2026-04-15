@@ -173,3 +173,28 @@ def append_rescue_log(row: dict[str, Any]) -> None:
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
     save_rescue_log_df(df)
 
+
+def reset_resource_runtime_state() -> None:
+    resources = load_resources()
+    for item in resources.get("inventory", []):
+        item["distributed"] = 0
+        item["in_transit"] = 0
+    resources["safe_zone_allocations"] = []
+    resources["distribution_log"] = []
+    save_resources(resources)
+
+    for city in CITY_MAP.keys():
+        zones = load_safe_zones(city)
+        for zone in zones:
+            zone["current_occupancy"] = 0
+            zone["resources"] = {
+                "food_packets": 0,
+                "water_liters": 0,
+                "medical_kits": 0,
+                "blankets": 0,
+                "rescue_boats": 0,
+                "emergency_medicines": 0,
+            }
+            zone["victims"] = {"critical": 0, "high": 0, "medium": 0, "low": 0, "recovered": 0, "total": 0}
+        save_safe_zones(zones, city)
+

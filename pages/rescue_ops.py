@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import time
+import heapq
 
 import pandas as pd
 import plotly.express as px
@@ -13,11 +13,12 @@ from core.graph_engine import get_positions, load_graph
 from core.greedy_selector import nearest_team_to_target
 from core.knapsack import build_victim_list, knapsack_01
 from core.mission_manager import MissionManager
+from core.data_loader import save_disaster_events
 from utils.visualizer import build_city_map
 
 
 def _badge(status: str) -> str:
-    color = {"en_route": "#f1c40f", "arrived": "#3498db", "rescued": "#9b59b6", "returning": "#4f8ef7", "complete": "#2ecc71"}.get(status, "#777")
+    color = {"en_route": "#ebcb8b", "arrived": "#88c0d0", "rescued": "#81a1c1", "returning": "#5e81ac", "complete": "#8fbcbb"}.get(status, "#4c566a")
     return f"<span style='background:{color};color:#fff;border-radius:999px;padding:3px 10px;font-weight:700;'>{status}</span>"
 
 
@@ -27,14 +28,14 @@ def render():
     events = load_disaster_events(city)
     units_df = load_rescue_units_df(city)
     nodes_df = pd.DataFrame(city_data.get("nodes", []))
-    node_name = {n["id"]: n.get("name", n["id"]) for n in city_data.get("nodes", [])}
+    node_map = {n["id"]: n for n in city_data.get("nodes", [])}
+    node_name = {n["id"]: n["id"] for n in city_data.get("nodes", [])}
     G = load_graph(city_data)
     positions = get_positions(city_data)
     mm = MissionManager()
 
     st.title("Rescue Operations Center")
     st.caption(city)
-    live = st.toggle("Live Updates (5s refresh)", key="live_refresh")
 
     st.subheader("Team Status Overview")
     teams = units_df.copy()
@@ -57,7 +58,12 @@ def render():
     st.dataframe(team_status_styler, use_container_width=True)
 
     st.subheader("Active Missions")
-    active = [m for m in mm.load() if m.get("status") != "complete" and m.get("city") == city]
+    active = [m for m in mm.load() if m.get("status") in {"en_route", "arrived", "returning", "rescued"} and m.get("city") == city]
+    rescued_active = [m for m in active if m.get("status") == "rescued"]
+    if rescued_active and st.button("Clear All Settled Missions"):
+        for m in rescued_active:
+            mm.complete_mission(m["mission_id"])
+        st.rerun()
     if not active:
         st.info("No active missions. Dispatch a team below.")
     for m in active:
@@ -66,6 +72,13 @@ def render():
             cur = m["current_step"]
             total = max(1, len(m["path"]) - 1)
             st.progress(cur / total, text=f"Step {cur} of {total} — At: {m['path_names'][cur]}")
+            visited = m["path"][: cur + 1]
+            remaining = m["path"][cur:]
+            highlights = [
+                {"path": visited, "color": "#8fbcbb", "width": 5, "label": "Visited", "dash": "solid", "show_steps": True},
+                {"path": remaining, "color": "#81a1c1", "width": 4, "label": "Remaining", "dash": "dot", "show_steps": False},
+            ]
+            st.plotly_chart(build_city_map(city_data, highlight_paths=highlights, show_labels=False), use_container_width=True)
             if m["status"] in {"en_route", "returning"}:
                 if st.button("Advance One Step", key=f"adv_{m['mission_id']}"):
                     mm.advance_step(m["mission_id"])
@@ -84,20 +97,54 @@ def render():
             elif m["status"] == "arrived":
                 st.info(f"Team has arrived at {m['target_name']}. {m['people_at_target']} people waiting. Injury: {m['injury_level']}")
                 if st.button(f"Confirm Rescue ({m['people_at_target']} people)", key=f"rescue_{m['mission_id']}"):
-                    mm.confirm_rescue(m["mission_id"], m["people_at_target"])
+                    try:
+                        mm.confirm_rescue(m["mission_id"], m["people_at_target"])
+                    except ValueError as ex:
+                        st.error(str(ex))
                     st.rerun()
             elif m["status"] == "rescued":
-                st.info("Rescue complete. Ready to return to base.")
+                st.info(f"Rescue complete. Transport survivors to safe zone: {m.get('safe_zone_name', 'Safe Zone')}")
                 if st.button("Start Return Journey", key=f"ret_{m['mission_id']}"):
                     mm.start_return(m["mission_id"])
+                    st.rerun()
+                if st.button("Close Mission (Already Settled)", key=f"close_{m['mission_id']}"):
+                    mm.complete_mission(m["mission_id"])
+                    st.success(f"{m['mission_id']} marked complete.")
                     st.rerun()
 
     st.subheader("Dispatch Rescue Team")
     left, right = st.columns([1, 1.2])
-    victims = nodes_df[nodes_df["people_stranded"] > 0].copy().sort_values("people_stranded", ascending=False)
+    active_affected = {n for e in events if e.get("active", False) for n in e.get("affected_nodes", [])}
+    victims = nodes_df[(nodes_df["id"].isin(active_affected)) & (nodes_df["people_stranded"] > 0)].copy().sort_values("people_stranded", ascending=False)
+    if victims.empty:
+        st.info("No currently stranded people in active disaster nodes. Use Disaster Control to set stranded population.")
+        return
+    available = units_df[units_df["status"] == "available"].copy()
+    if available.empty:
+        st.warning("No available teams to dispatch.")
+        return
+    team_capacity_budget = int(available["capacity"].sum())
+    intro = build_victim_list(city_data, victims["id"].tolist(), events)
+    knapsack_out = knapsack_01(intro, team_capacity_budget)
+    selected_nodes = {row["node_id"] for row in knapsack_out["selected"]}
+    if selected_nodes:
+        victims = victims[victims["id"].isin(selected_nodes)].copy()
+    pq = []
+    for _, row in victims.iterrows():
+        severity_weight = {"critical": 4, "high": 3, "medium": 2, "low": 1}.get(str(row.get("injury_level", "low")).lower(), 1)
+        priority = -(severity_weight * int(row.get("people_stranded", 0)))
+        heapq.heappush(pq, (priority, row["id"]))
+    top_node = pq[0][1] if pq else victims.iloc[0]["id"]
     with left:
-        tgt = st.selectbox("Target Node", victims["id"].tolist(), format_func=lambda n: node_name.get(n, n))
-        available = units_df[units_df["status"] == "available"]
+        st.caption("Priority Queue (higher severity and stranded people first)")
+        queue_preview = [{"rank": i + 1, "node": node_name[n], "node_id": n} for i, (_, n) in enumerate(sorted(pq)[:10])]
+        st.dataframe(queue_preview, use_container_width=True, hide_index=True)
+        tgt = st.selectbox(
+            "Target Node",
+            victims["id"].tolist(),
+            index=victims["id"].tolist().index(top_node),
+            format_func=lambda n: f"{node_name.get(n, n)}",
+        )
         strategy = st.radio("Recommendation Strategy", ["Nearest team to target", "Highest priority team (best fuel + kits)"])
         unit_types = {r["unit_id"]: ("helicopter" if r["unit_type"] == "helicopter" else "ground") for _, r in available.iterrows()}
         rec = nearest_team_to_target(G, tgt, available.to_dict(orient="records"), events, unit_types) if strategy.startswith("Nearest") else {}
@@ -117,9 +164,9 @@ def render():
                 fig = px.bar(df, x=col, y="Algorithm", orientation="h", template="plotly_dark")
                 c.plotly_chart(fig, use_container_width=True)
             rec_path = out["recommended"]["path"]
-            hp = [{"path": rec_path, "color": "#2ecc71", "width": 4, "label": f"{out['recommended']['algorithm']} path", "dash": "solid", "show_steps": True}]
+            hp = [{"path": rec_path, "color": "#88c0d0", "width": 4, "label": f"{out['recommended']['algorithm']} path", "dash": "solid", "show_steps": True}]
             st.plotly_chart(build_city_map(city_data, highlight_paths=hp, show_labels=False), use_container_width=True)
-            st.caption(f"{out['recommended']['algorithm']} — {out['recommended']['why_selected']}")
+            st.caption(f"{out['recommended']['algorithm']} — {out['recommended']['why_selected']} Teams begin from safe zones and return survivors to nearest safe zone.")
             override = st.selectbox("Use different algorithm", ["Recommended"] + df["Algorithm"].tolist())
             selected_algo = out["recommended"]["algorithm"] if override == "Recommended" else override
             btn = st.button(f"Dispatch {team['name']} via {selected_algo}")
@@ -148,8 +195,7 @@ def render():
                 st.rerun()
 
     with st.expander("Knapsack Optimization — Prioritize Rescue Targets"):
-        intro = build_victim_list(city_data, victims["id"].tolist(), events)
-        cap = round(sum((r["capacity"] * (r["fuel_remaining"] / 100.0)) for _, r in units_df[units_df["status"] == "available"].iterrows()))
+        cap = int(available["capacity"].sum())
         out = knapsack_01(intro, cap)
         st.dataframe(pd.DataFrame(intro), use_container_width=True)
         st.dataframe(pd.DataFrame(out["dp_table"]).style.background_gradient(cmap="Blues"), use_container_width=True)
@@ -158,8 +204,26 @@ def render():
     with st.expander("Rescue Log"):
         log_df = load_rescue_log_df()
         st.dataframe(log_df, use_container_width=True)
-
-    if live:
-        time.sleep(5)
-        st.rerun()
+    city_rescue_log = load_rescue_log_df()
+    if not city_rescue_log.empty:
+        city_rescue_log = city_rescue_log[city_rescue_log["city"] == city]
+    open_events = [e for e in events if e.get("active", False)]
+    unresolved_stranded = int(nodes_df["people_stranded"].sum()) if not nodes_df.empty else 0
+    if not active and unresolved_stranded == 0 and not city_rescue_log.empty:
+        total_people = int(city_rescue_log["people_rescued"].fillna(0).sum())
+        avg_nodes = float(city_rescue_log["nodes_explored"].fillna(0).mean())
+        avg_time = float(city_rescue_log["time_ms"].fillna(0).mean())
+        optimality = max(0.0, min(100.0, 100.0 - (avg_nodes * 2.0 + (avg_time / 10.0))))
+        st.success("Successful rescue mission campaign completed.")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("People Rescued", total_people)
+        c2.metric("Avg Nodes Explored", f"{avg_nodes:.1f}")
+        c3.metric("Optimality Score", f"{optimality:.1f}/100")
+        if open_events and st.button("Resolve All Active Disasters"):
+            for e in events:
+                if e.get("active", False):
+                    e["active"] = False
+                    e["resolved_at"] = pd.Timestamp.now().isoformat()
+            save_disaster_events(events, city)
+            st.rerun()
 

@@ -21,7 +21,7 @@
       "category": "water",
       "total_stock": 8000,
       "unit": "liters",
-      "distributed": 50,
+      "distributed": 0,
       "in_transit": 0
     },
     {
@@ -61,38 +61,6 @@
       "in_transit": 0
     }
   ],
-  "safe_zone_allocations": [
-    {
-      "allocation_id": "ALC-D473F4AC",
-      "resource_id": "R002",
-      "resource_name": "Water",
-      "quantity": 50,
-      "unit": "liters",
-      "safe_zone_id": "SZ-01",
-      "safe_zone_name": "North Safe Center",
-      "status": "delivered",
-      "dispatched_at": "2026-04-13T12:50:49",
-      "delivered_at": "2026-04-13T12:50:57"
-    }
-  ],
-  "distribution_log": [
-    {
-      "time": "2026-04-13T12:50:49",
-      "action": "dispatch",
-      "resource_id": "R002",
-      "resource_name": "Water",
-      "quantity": 50,
-      "safe_zone_id": "SZ-01",
-      "safe_zone_name": "North Safe Center"
-    },
-    {
-      "time": "2026-04-13T12:50:57",
-      "action": "delivered",
-      "resource_id": "R002",
-      "resource_name": "Water",
-      "quantity": 50,
-      "safe_zone_id": "SZ-01",
-      "safe_zone_name": "North Safe Center"
-    }
-  ]
+  "safe_zone_allocations": [],
+  "distribution_log": []
 }
