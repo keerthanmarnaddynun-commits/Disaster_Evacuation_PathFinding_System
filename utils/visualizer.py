@@ -4,11 +4,11 @@ import plotly.graph_objects as go
 
 
 TYPE_STYLES = {
-    "safe_zone": {"color": "#2ecc71", "symbol": "circle", "size": 18},
-    "hospital": {"color": "#4f8ef7", "symbol": "circle", "size": 14},
-    "shelter": {"color": "#9b59b6", "symbol": "circle", "size": 14},
-    "bridge": {"color": "#f39c12", "symbol": "diamond", "size": 14},
-    "intersection": {"color": "#9aa0aa", "symbol": "circle", "size": 10},
+    "safe_zone": {"color": "#a6da95", "symbol": "circle", "size": 18},
+    "hospital": {"color": "#8aadf4", "symbol": "circle", "size": 14},
+    "shelter": {"color": "#c6a0f6", "symbol": "circle", "size": 14},
+    "bridge": {"color": "#f5a97f", "symbol": "diamond", "size": 14},
+    "intersection": {"color": "#5b6078", "symbol": "circle", "size": 10},
 }
 
 def build_city_map(
@@ -36,10 +36,10 @@ def build_city_map(
         x1, y1 = positions[v]
         key = tuple(sorted((u, v)))
         is_air = bool(e.get("air_only", False) or e.get("road_type") == "air")
-        color = "#4f8ef7" if is_air else "rgba(180,180,180,0.55)"
+        color = "#91d7e3" if is_air else "rgba(91,96,120,0.75)"
         dash = "dash" if is_air else "solid"
         if key in blocked:
-            color = "#e74c3c"
+            color = "#ed8796"
             dash = "dash"
 
         fig.add_trace(
@@ -57,7 +57,7 @@ def build_city_map(
     if highlight_paths:
         for p in highlight_paths:
             path = p.get("path", [])
-            color = p.get("color", "#2ecc71")
+            color = p.get("color", "#a6da95")
             width = int(p.get("width", 3))
             label = p.get("label", "Path")
             dash = p.get("dash", "solid")
@@ -103,7 +103,7 @@ def build_city_map(
                         y=my,
                         text=str(i + 1),
                         showarrow=False,
-                        font=dict(size=10, color="#ffffff"),
+                        font=dict(size=10, color="#cad3f5"),
                         bgcolor=color,
                         opacity=0.9,
                     )
@@ -160,7 +160,7 @@ def build_city_map(
                 x=[x],
                 y=[y],
                 mode="markers",
-                marker=dict(symbol="square", size=7, color="#ffffff", line=dict(color="#111111", width=1)),
+                marker=dict(symbol="square", size=7, color="#cad3f5", line=dict(color="#181926", width=1)),
                 hoverinfo="skip",
                 showlegend=False,
             )
@@ -170,7 +170,7 @@ def build_city_map(
         ax, ay, acol, ahover, asymbols, alabels = [], [], [], [], [], []
         for unit_id, info in agent_positions.items():
             node_id = info.get("node_id")
-            color = info.get("color", "#4f8ef7")
+            color = info.get("color", "#8aadf4")
             mode = info.get("mode", "ground")
             if node_id not in positions:
                 continue
@@ -190,7 +190,7 @@ def build_city_map(
                     mode="markers+text",
                     text=alabels,
                     textposition="middle right",
-                    marker=dict(symbol=asymbols, size=16, color=acol, line=dict(color="#ffffff", width=1)),
+                    marker=dict(symbol=asymbols, size=16, color=acol, line=dict(color="#cad3f5", width=1)),
                     hoverinfo="text",
                     hovertext=ahover,
                     showlegend=False,
@@ -205,9 +205,9 @@ def build_city_map(
             x, y = positions[node_id]
             visited = bool(item.get("visited"))
             is_current = bool(item.get("current"))
-            fill = "#1f6f43" if visited else "#2b2f3a"
+            fill = "#a6da95" if visited else "#363a4f"
             if is_current:
-                fill = "#2d7ff9"
+                fill = "#8aadf4"
             fig.add_trace(
                 go.Scatter(
                     x=[x],
@@ -219,7 +219,7 @@ def build_city_map(
                         color=fill,
                         size=20 if is_current else 16,
                         symbol="circle",
-                        line=dict(color="#ffffff" if is_current else "#6f778a", width=3 if is_current else 1),
+                        line=dict(color="#cad3f5" if is_current else "#5b6078", width=3 if is_current else 1),
                     ),
                     showlegend=False,
                     hoverinfo="skip",
@@ -239,7 +239,7 @@ def build_city_map(
                 y0=y - 0.25,
                 x1=x + 0.25,
                 y1=y + 0.25,
-                line=dict(color="#f39c12", width=2, dash="dot"),
+                line=dict(color="#eed49f", width=2, dash="dot"),
             )
 
     fig.add_annotation(
@@ -247,7 +247,7 @@ def build_city_map(
         y=0.02,
         xref="paper",
         yref="paper",
-        text="Road: <span style='color:#b4b4b4;'>━━</span><br>Air Corridor: <span style='color:#4f8ef7;'>- - -</span><br>Blocked Road: <span style='color:#e74c3c;'>- - -</span>",
+        text="Road: <span style='color:#5b6078;'>━━</span><br>Air Corridor: <span style='color:#91d7e3;'>- - -</span><br>Blocked Road: <span style='color:#ed8796;'>- - -</span>",
         showarrow=False,
         xanchor="right",
         yanchor="bottom",
@@ -256,10 +256,11 @@ def build_city_map(
     fig.update_layout(
         template="plotly_dark",
         margin=dict(l=10, r=10, t=10, b=10),
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, scaleanchor="x", scaleratio=1),
-        paper_bgcolor="#0f1117",
-        plot_bgcolor="#0f1117",
+        xaxis=dict(showgrid=False, gridcolor="#494d64", zeroline=False, showticklabels=False),
+        yaxis=dict(showgrid=False, gridcolor="#494d64", zeroline=False, showticklabels=False, scaleanchor="x", scaleratio=1),
+        paper_bgcolor="#24273a",
+        plot_bgcolor="#24273a",
+        font=dict(color="#cad3f5"),
         height=560,
     )
     return fig

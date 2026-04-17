@@ -10,8 +10,13 @@
       "zone": "Zone-A",
       "elevation": 20,
       "population_density": 500,
-      "people_stranded": 200,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N002",
@@ -23,7 +28,12 @@
       "elevation": 19,
       "population_density": 520,
       "people_stranded": 0,
-      "helipad": false
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N003",
@@ -35,7 +45,12 @@
       "elevation": 20,
       "population_density": 500,
       "people_stranded": 0,
-      "helipad": false
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N004",
@@ -47,7 +62,12 @@
       "elevation": 21,
       "population_density": 460,
       "people_stranded": 0,
-      "helipad": false
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N005",
@@ -59,7 +79,12 @@
       "elevation": 22,
       "population_density": 380,
       "people_stranded": 0,
-      "helipad": true
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N006",
@@ -71,7 +96,12 @@
       "elevation": 21,
       "population_density": 420,
       "people_stranded": 0,
-      "helipad": true
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N007",
@@ -83,7 +113,12 @@
       "elevation": 30,
       "population_density": 100,
       "people_stranded": 0,
-      "helipad": true
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N008",
@@ -95,7 +130,12 @@
       "elevation": 18,
       "population_density": 420,
       "people_stranded": 0,
-      "helipad": false
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N009",
@@ -107,7 +147,12 @@
       "elevation": 17,
       "population_density": 460,
       "people_stranded": 0,
-      "helipad": false
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N010",
@@ -119,7 +164,12 @@
       "elevation": 16,
       "population_density": 500,
       "people_stranded": 0,
-      "helipad": false
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N011",
@@ -131,7 +181,12 @@
       "elevation": 15,
       "population_density": 520,
       "people_stranded": 0,
-      "helipad": false
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N012",
@@ -143,7 +198,12 @@
       "elevation": 16,
       "population_density": 280,
       "people_stranded": 0,
-      "helipad": false
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N013",
@@ -154,8 +214,13 @@
       "zone": "Zone-C",
       "elevation": 25,
       "population_density": 320,
-      "people_stranded": 160,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N014",
@@ -167,7 +232,12 @@
       "elevation": 31,
       "population_density": 110,
       "people_stranded": 0,
-      "helipad": true
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N015",
@@ -178,8 +248,13 @@
       "zone": "Zone-C",
       "elevation": 26,
       "population_density": 420,
-      "people_stranded": 210,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N016",
@@ -190,8 +265,13 @@
       "zone": "Zone-C",
       "elevation": 27,
       "population_density": 360,
-      "people_stranded": 120,
-      "helipad": true
+      "people_stranded": 0,
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N017",
@@ -202,8 +282,13 @@
       "zone": "Zone-C",
       "elevation": 24,
       "population_density": 330,
-      "people_stranded": 170,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N018",
@@ -214,8 +299,13 @@
       "zone": "Zone-C",
       "elevation": 23,
       "population_density": 340,
-      "people_stranded": 190,
-      "helipad": true
+      "people_stranded": 0,
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N019",
@@ -226,8 +316,13 @@
       "zone": "Zone-D",
       "elevation": 17,
       "population_density": 430,
-      "people_stranded": 220,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N020",
@@ -239,7 +334,12 @@
       "elevation": 30,
       "population_density": 120,
       "people_stranded": 0,
-      "helipad": true
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N021",
@@ -250,8 +350,13 @@
       "zone": "Zone-D",
       "elevation": 18,
       "population_density": 410,
-      "people_stranded": 200,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N022",
@@ -262,8 +367,13 @@
       "zone": "Zone-D",
       "elevation": 16,
       "population_density": 370,
-      "people_stranded": 180,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N023",
@@ -274,8 +384,13 @@
       "zone": "Zone-D",
       "elevation": 15,
       "population_density": 320,
-      "people_stranded": 150,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N024",
@@ -286,8 +401,13 @@
       "zone": "Zone-D",
       "elevation": 14,
       "population_density": 260,
-      "people_stranded": 120,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N025",
@@ -299,7 +419,12 @@
       "elevation": 20,
       "population_density": 340,
       "people_stranded": 0,
-      "helipad": true
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N026",
@@ -310,8 +435,13 @@
       "zone": "Zone-E",
       "elevation": 19,
       "population_density": 440,
-      "people_stranded": 210,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N027",
@@ -322,8 +452,13 @@
       "zone": "Zone-E",
       "elevation": 17,
       "population_density": 390,
-      "people_stranded": 190,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N028",
@@ -335,7 +470,12 @@
       "elevation": 35,
       "population_density": 90,
       "people_stranded": 0,
-      "helipad": true
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N029",
@@ -346,8 +486,13 @@
       "zone": "Zone-E",
       "elevation": 15,
       "population_density": 310,
-      "people_stranded": 140,
-      "helipad": true
+      "people_stranded": 0,
+      "helipad": true,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     },
     {
       "id": "N030",
@@ -358,8 +503,13 @@
       "zone": "Zone-E",
       "elevation": 14,
       "population_density": 420,
-      "people_stranded": 180,
-      "helipad": false
+      "people_stranded": 0,
+      "helipad": false,
+      "rescued": false,
+      "injury_level": "none",
+      "rescue_cost": 0,
+      "survival_chance": 1.0,
+      "risk_score": 0.0
     }
   ],
   "edges": [

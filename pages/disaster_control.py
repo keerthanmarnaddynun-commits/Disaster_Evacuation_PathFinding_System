@@ -15,8 +15,9 @@ from utils.visualizer import build_city_map
 
 
 def render():
-    active_city = st.session_state.get("active_city", "Veridian City")
-    st.markdown('<div style="font-size:2rem;font-weight:700;color:#ffffff;">Disaster Control Panel</div>', unsafe_allow_html=True)
+    active_city = st.session_state.get("active_map", "Map 1")
+    st.session_state["active_city"] = active_city
+    st.markdown('<div style="font-size:2rem;font-weight:700;color:#cad3f5;">Disaster Control Panel</div>', unsafe_allow_html=True)
 
     city = load_city_graph(active_city)
     events = load_disaster_events(active_city)
@@ -31,7 +32,7 @@ def render():
     c2.metric("Blocked Roads", len(blocked))
     c3.metric("Affected Nodes", len({n for e in active_events for n in e.get('affected_nodes', [])}))
     c4.metric("Zones at Risk", len({n.get("zone", "") for n in city.get("nodes", []) if n["id"] in {x for e in active_events for x in e.get("affected_nodes", [])}}))
-    st.plotly_chart(build_city_map(city, blocked_edges=blocked, show_labels=False), use_container_width=True)
+    st.plotly_chart(build_city_map(city, blocked_edges=blocked, show_labels=False), width="stretch")
 
     st.markdown("### Simulate New Disaster")
     form_left, form_right = st.columns([0.66, 0.34], gap="large")
@@ -49,7 +50,6 @@ def render():
         epicenter = st.selectbox(
             "Epicenter Node",
             [n["id"] for n in city.get("nodes", [])],
-            format_func=lambda x: f"{x} - {node_id_to_name[x]}",
             key="epicenter_node",
         )
     with form_right:
@@ -58,22 +58,22 @@ def render():
         preview = st.checkbox("Preview before triggering", key="preview_disaster")
     if preview:
         preview_event = spread_disaster(G, epicenter, radius, dtype.lower(), severity.lower())
-        st.plotly_chart(build_city_map(city, blocked_edges=blocked, isolated_nodes=preview_event["affected_nodes"], show_labels=False), use_container_width=True)
+        st.plotly_chart(build_city_map(city, blocked_edges=blocked, isolated_nodes=preview_event["affected_nodes"], show_labels=False), width="stretch")
         st.subheader("Disaster Impact Preview")
         ndf = pd.DataFrame(city.get("nodes", []))
         affected_df = ndf[ndf["id"].isin(preview_event.get("affected_nodes", []))][["id", "zone", "people_stranded"]]
         affected_df["Current Risk Score"] = affected_df["id"].apply(lambda x: 1)
-        st.dataframe(affected_df.rename(columns={"id": "Node", "zone": "Zone", "people_stranded": "People Stranded"}), use_container_width=True)
+        st.dataframe(affected_df.rename(columns={"id": "Node", "zone": "Zone", "people_stranded": "People Stranded"}), width="stretch")
         blocked_df = pd.DataFrame(preview_event.get("blocked_edges", []), columns=["From", "To"])
         blocked_df["Road Name"] = blocked_df["From"] + " - " + blocked_df["To"]
         blocked_df["Road Type"] = "local"
-        st.dataframe(blocked_df[["Road Name", "From", "To", "Road Type"]], use_container_width=True)
+        st.dataframe(blocked_df[["Road Name", "From", "To", "Road Type"]], width="stretch")
         st.metric("Estimated people affected", int(affected_df["People Stranded"].sum()) if "People Stranded" in affected_df else 0)
         teams_df = load_rescue_units_df(active_city)
         if not teams_df.empty:
             affected_nodes = set(preview_event.get("affected_nodes", []))
             teams = teams_df[teams_df["base_node"].isin(affected_nodes)][["unit_id", "name", "base_node"]]
-            st.dataframe(teams, use_container_width=True)
+            st.dataframe(teams, width="stretch")
     if st.button("Trigger Disaster", key="trigger_disaster"):
         new_ev = spread_disaster(G, epicenter, radius, dtype.lower(), severity.lower())
         events.append(new_ev)
@@ -90,28 +90,55 @@ def render():
         st.info("No active disaster nodes. Trigger a disaster first, then set stranded people.")
     else:
         node_map = {n["id"]: n for n in city.get("nodes", [])}
-        changed = False
-        for nid in active_affected_nodes:
-            node = node_map.get(nid, {})
-            cur = int(node.get("people_stranded", 0))
-            row_left, row_right = st.columns([0.68, 0.32], gap="small")
-            row_left.markdown(f"**{node_id_to_name.get(nid, nid)}** (`{nid}`)")
-            with row_right:
-                new_val = st.slider(
-                    "Stranded",
-                    min_value=0,
-                    max_value=1000,
-                    value=cur,
-                    step=10,
-                    key=f"stranded_{nid}",
-                    label_visibility="collapsed",
-                )
-            if new_val != cur:
-                node["people_stranded"] = int(new_val)
-                changed = True
-        if changed:
+        editor_left, editor_right = st.columns(2, gap="large")
+        selected_node_id = editor_left.selectbox("Node", active_affected_nodes, key="stranded_node_selector")
+        selected_node = node_map[selected_node_id]
+        capacity = int(selected_node.get("population_capacity", max(1, selected_node.get("population_density", 500))))
+        editor_left.metric("Node ID", selected_node_id)
+        editor_left.metric("Current Stranded", int(selected_node.get("people_stranded", 0)))
+        editor_left.metric("Population Capacity", capacity)
+        editor_left.metric("Current Injury Level", str(selected_node.get("injury_level", "none")).lower())
+
+        with editor_right.form("stranded_editor_form"):
+            stranded_value = st.number_input(
+                label="People Stranded",
+                min_value=0,
+                max_value=capacity,
+                value=int(selected_node.get("people_stranded", 0)),
+                step=1,
+                key="stranded_input",
+            )
+            injury_value = st.selectbox(
+                "Injury Level",
+                ["none", "low", "medium", "high", "critical"],
+                index=["none", "low", "medium", "high", "critical"].index(str(selected_node.get("injury_level", "none")).lower())
+                if str(selected_node.get("injury_level", "none")).lower() in {"none", "low", "medium", "high", "critical"}
+                else 0,
+            )
+            survival_value = st.number_input(
+                "Survival Chance",
+                min_value=0.10,
+                max_value=1.00,
+                value=float(selected_node.get("survival_chance", 1.0)),
+                step=0.05,
+            )
+            rescue_cost_value = st.number_input(
+                "Rescue Cost",
+                min_value=0,
+                max_value=10,
+                value=int(selected_node.get("rescue_cost", 0)),
+                step=1,
+            )
+            save_node = st.form_submit_button("Save Node Settings", width="stretch")
+
+        if save_node:
+            selected_node["people_stranded"] = int(stranded_value)
+            selected_node["injury_level"] = injury_value
+            selected_node["survival_chance"] = float(survival_value)
+            selected_node["rescue_cost"] = int(rescue_cost_value)
             save_city_graph(city, active_city)
-            st.toast("Stranded population updated.")
+            st.success(f"Updated {selected_node_id}.")
+            st.rerun()
 
     st.markdown("### Active Disasters")
     for i, ev in enumerate(active_events):
@@ -189,5 +216,5 @@ def render():
                 "Resolved At": ev.get("resolved_at", ""),
             }
         )
-    st.dataframe(rows, use_container_width=True, hide_index=True)
+    st.dataframe(rows, width="stretch", hide_index=True)
 

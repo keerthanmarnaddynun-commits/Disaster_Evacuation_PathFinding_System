@@ -1,13 +1,7 @@
-"""
-BFS — shortest path in unweighted graphs.
-Time: O(V+E), Space: O(V). Optimal for unweighted.
-"""
-
 from collections import deque
 
 
 def bfs(graph: dict, start: str, goal: str) -> list[str] | None:
-    # deque-based BFS, returns path or None
     if start == goal:
         return [start]
 
@@ -21,7 +15,6 @@ def bfs(graph: dict, start: str, goal: str) -> list[str] | None:
                 continue
             parent[nbr] = node
             if nbr == goal:
-                # Reconstruct
                 path = [goal]
                 cur: str | None = goal
                 while cur is not None:

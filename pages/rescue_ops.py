@@ -18,12 +18,13 @@ from utils.visualizer import build_city_map
 
 
 def _badge(status: str) -> str:
-    color = {"en_route": "#ebcb8b", "arrived": "#88c0d0", "rescued": "#81a1c1", "returning": "#5e81ac", "complete": "#8fbcbb"}.get(status, "#4c566a")
+    color = {"en_route": "#eed49f", "arrived": "#91d7e3", "rescued": "#7dc4e4", "returning": "#8aadf4", "complete": "#a6da95"}.get(status, "#5b6078")
     return f"<span style='background:{color};color:#fff;border-radius:999px;padding:3px 10px;font-weight:700;'>{status}</span>"
 
 
 def render():
-    city = st.session_state.get("active_city", "Veridian City")
+    city = st.session_state.get("active_map", "Map 1")
+    st.session_state["active_city"] = city
     city_data = load_city_graph(city)
     events = load_disaster_events(city)
     units_df = load_rescue_units_df(city)
@@ -52,10 +53,10 @@ def render():
         }
     )[["Team", "Type", "Current Location", "Status", "Fuel %", "Kits", "Rescued"]]
     team_status_styler = team_status_df.style.map(
-        lambda v: "background-color:#e74c3c;" if isinstance(v, (int, float)) and v < 20 else "",
+        lambda v: "background-color:#ed8796;" if isinstance(v, (int, float)) and v < 20 else "",
         subset=["Fuel %"],
     )
-    st.dataframe(team_status_styler, use_container_width=True)
+    st.dataframe(team_status_styler, width="stretch")
 
     st.subheader("Active Missions")
     active = [m for m in mm.load() if m.get("status") in {"en_route", "arrived", "returning", "rescued"} and m.get("city") == city]
@@ -75,10 +76,10 @@ def render():
             visited = m["path"][: cur + 1]
             remaining = m["path"][cur:]
             highlights = [
-                {"path": visited, "color": "#8fbcbb", "width": 5, "label": "Visited", "dash": "solid", "show_steps": True},
-                {"path": remaining, "color": "#81a1c1", "width": 4, "label": "Remaining", "dash": "dot", "show_steps": False},
+                {"path": visited, "color": "#a6da95", "width": 5, "label": "Visited", "dash": "solid", "show_steps": True},
+                {"path": remaining, "color": "#7dc4e4", "width": 4, "label": "Remaining", "dash": "dot", "show_steps": False},
             ]
-            st.plotly_chart(build_city_map(city_data, highlight_paths=highlights, show_labels=False), use_container_width=True)
+            st.plotly_chart(build_city_map(city_data, highlight_paths=highlights, show_labels=False), width="stretch")
             if m["status"] in {"en_route", "returning"}:
                 if st.button("Advance One Step", key=f"adv_{m['mission_id']}"):
                     mm.advance_step(m["mission_id"])
@@ -138,7 +139,7 @@ def render():
     with left:
         st.caption("Priority Queue (higher severity and stranded people first)")
         queue_preview = [{"rank": i + 1, "node": node_name[n], "node_id": n} for i, (_, n) in enumerate(sorted(pq)[:10])]
-        st.dataframe(queue_preview, use_container_width=True, hide_index=True)
+        st.dataframe(queue_preview, width="stretch", hide_index=True)
         tgt = st.selectbox(
             "Target Node",
             victims["id"].tolist(),
@@ -158,14 +159,21 @@ def render():
         df = pd.DataFrame(out["all_results"])
         if not df.empty:
             df["Air Route"] = df["used_air_edges"].map(lambda v: "AIR" if v else "Road")
-            st.dataframe(df[["Algorithm", "Path Found", "Path Length", "Nodes Explored", "Time (ms)", "Safety Score", "Air Route"]], use_container_width=True)
+            st.dataframe(df[["Algorithm", "Path Found", "Path Length", "Nodes Explored", "Time (ms)", "Safety Score", "Air Route"]], width="stretch")
             c1, c2, c3 = st.columns(3)
             for col, c in [("Nodes Explored", c1), ("Time (ms)", c2), ("Path Length", c3)]:
                 fig = px.bar(df, x=col, y="Algorithm", orientation="h", template="plotly_dark")
-                c.plotly_chart(fig, use_container_width=True)
+                fig.update_layout(
+                    paper_bgcolor="#24273a",
+                    plot_bgcolor="#24273a",
+                    font={"color": "#cad3f5"},
+                )
+                fig.update_xaxes(gridcolor="#494d64")
+                fig.update_yaxes(gridcolor="#494d64")
+                c.plotly_chart(fig, width="stretch")
             rec_path = out["recommended"]["path"]
-            hp = [{"path": rec_path, "color": "#88c0d0", "width": 4, "label": f"{out['recommended']['algorithm']} path", "dash": "solid", "show_steps": True}]
-            st.plotly_chart(build_city_map(city_data, highlight_paths=hp, show_labels=False), use_container_width=True)
+            hp = [{"path": rec_path, "color": "#91d7e3", "width": 4, "label": f"{out['recommended']['algorithm']} path", "dash": "solid", "show_steps": True}]
+            st.plotly_chart(build_city_map(city_data, highlight_paths=hp, show_labels=False), width="stretch")
             st.caption(f"{out['recommended']['algorithm']} — {out['recommended']['why_selected']} Teams begin from safe zones and return survivors to nearest safe zone.")
             override = st.selectbox("Use different algorithm", ["Recommended"] + df["Algorithm"].tolist())
             selected_algo = out["recommended"]["algorithm"] if override == "Recommended" else override
@@ -197,13 +205,13 @@ def render():
     with st.expander("Knapsack Optimization — Prioritize Rescue Targets"):
         cap = int(available["capacity"].sum())
         out = knapsack_01(intro, cap)
-        st.dataframe(pd.DataFrame(intro), use_container_width=True)
-        st.dataframe(pd.DataFrame(out["dp_table"]).style.background_gradient(cmap="Blues"), use_container_width=True)
-        st.dataframe(pd.DataFrame(out["selected"]), use_container_width=True)
+        st.dataframe(pd.DataFrame(intro), width="stretch")
+        st.dataframe(pd.DataFrame(out["dp_table"]).style.background_gradient(cmap="Blues"), width="stretch")
+        st.dataframe(pd.DataFrame(out["selected"]), width="stretch")
 
     with st.expander("Rescue Log"):
         log_df = load_rescue_log_df()
-        st.dataframe(log_df, use_container_width=True)
+        st.dataframe(log_df, width="stretch")
     city_rescue_log = load_rescue_log_df()
     if not city_rescue_log.empty:
         city_rescue_log = city_rescue_log[city_rescue_log["city"] == city]

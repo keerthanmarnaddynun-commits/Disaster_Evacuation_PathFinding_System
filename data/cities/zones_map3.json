@@ -1,0 +1,8 @@
+[
+  {"zone_id": "Zone-A", "zone_name": "Zone A", "risk_level": "low", "population": 1800, "nodes": ["N001", "N002", "N003", "N004", "N005"]},
+  {"zone_id": "Zone-B", "zone_name": "Zone B", "risk_level": "medium", "population": 2000, "nodes": ["N006", "N007", "N008", "N009", "N010"]},
+  {"zone_id": "Zone-C", "zone_name": "Zone C", "risk_level": "high", "population": 2100, "nodes": ["N011", "N012", "N013", "N014", "N015"]},
+  {"zone_id": "Zone-D", "zone_name": "Zone D", "risk_level": "medium", "population": 1900, "nodes": ["N016", "N017", "N018", "N019", "N020"]},
+  {"zone_id": "Zone-E", "zone_name": "Zone E", "risk_level": "low", "population": 1700, "nodes": ["N021", "N022", "N023", "N024", "N025"]},
+  {"zone_id": "Zone-F", "zone_name": "Zone F", "risk_level": "high", "population": 1600, "nodes": ["N026", "N027", "N028", "N029", "N030"]}
+]

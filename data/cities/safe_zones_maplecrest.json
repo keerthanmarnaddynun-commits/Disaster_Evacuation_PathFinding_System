@@ -9,9 +9,7 @@
       "food_packets": 0,
       "water_liters": 0,
       "medical_kits": 0,
-      "blankets": 0,
-      "rescue_boats": 0,
-      "emergency_medicines": 0
+      "blankets": 0
     },
     "victims": {
       "critical": 0,
@@ -32,9 +30,7 @@
       "food_packets": 0,
       "water_liters": 0,
       "medical_kits": 0,
-      "blankets": 0,
-      "rescue_boats": 0,
-      "emergency_medicines": 0
+      "blankets": 0
     },
     "victims": {
       "critical": 0,
@@ -55,9 +51,7 @@
       "food_packets": 0,
       "water_liters": 0,
       "medical_kits": 0,
-      "blankets": 0,
-      "rescue_boats": 0,
-      "emergency_medicines": 0
+      "blankets": 0
     },
     "victims": {
       "critical": 0,
@@ -78,17 +72,15 @@
       "food_packets": 0,
       "water_liters": 0,
       "medical_kits": 0,
-      "blankets": 0,
-      "rescue_boats": 0,
-      "emergency_medicines": 0
+      "blankets": 0
     },
     "victims": {
       "critical": 0,
-      "high": 0,
+      "high": 1000,
       "medium": 0,
       "low": 0,
       "recovered": 0,
-      "total": 0
+      "total": 1000
     }
   },
   {
@@ -101,9 +93,7 @@
       "food_packets": 0,
       "water_liters": 0,
       "medical_kits": 0,
-      "blankets": 0,
-      "rescue_boats": 0,
-      "emergency_medicines": 0
+      "blankets": 0
     },
     "victims": {
       "critical": 0,

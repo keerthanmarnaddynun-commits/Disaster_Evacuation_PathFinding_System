@@ -82,7 +82,7 @@ class ResourceManager:
         self.save(data)
         return allocation
 
-    def confirm_delivery(self, allocation_id):
+    def confirm_delivery(self, allocation_id, map_name: str = "Map 1"):
         data = self.load()
         allocs = data.get("safe_zone_allocations", [])
         alloc = next((a for a in allocs if a.get("allocation_id") == allocation_id), None)
@@ -120,7 +120,7 @@ class ResourceManager:
         self.save(data)
 
         # Update safe_zones.json resources dict for that zone
-        city = str(alloc.get("city", "Veridian City"))
+        city = str(alloc.get("city", map_name))
         zones = load_safe_zones(city)
         sz = next((z for z in zones if z.get("id") == alloc.get("safe_zone_id")), None)
         if sz:
@@ -138,8 +138,8 @@ class ResourceManager:
                 sz["resources"][k] = int(sz["resources"].get(k, 0)) + qty
             save_safe_zones(zones, city)
 
-    def apply_recovery_cycle(self, city: str = "Veridian City") -> dict:
-        zones = load_safe_zones(city)
+    def apply_recovery_cycle(self, map_name: str = "Map 1") -> dict:
+        zones = load_safe_zones(map_name)
         total_recovered = 0
         still_injured = 0
         for z in zones:
@@ -171,7 +171,7 @@ class ResourceManager:
             resources["medical_kits"] = max(0, meds - max(1, used // 4) if used > 0 else meds)
             still_injured += int(victims.get("critical", 0)) + int(victims.get("high", 0)) + int(victims.get("medium", 0)) + int(victims.get("low", 0))
 
-        save_safe_zones(zones, city)
+        save_safe_zones(zones, map_name)
         return {"recovered": total_recovered, "remaining_injured": still_injured}
 
     def restock(self, resource_id, quantity, reason):

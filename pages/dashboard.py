@@ -11,7 +11,7 @@ from core.disaster_manager import compute_risk_score, get_all_blocked_edges
 from core.mission_manager import MissionManager
 from utils.visualizer import build_city_map
 
-MAP_NAME = {"Veridian City": "Map 1", "Harborfield": "Map 2", "Maplecrest": "Map 3"}
+MAP_OPTIONS = ["Map 1", "Map 2", "Map 3"]
 
 
 def _risk_badge(level: str) -> str:
@@ -26,7 +26,7 @@ def _risk_badge(level: str) -> str:
 
 
 def render():
-    active_city = st.session_state.get("active_city", "Veridian City")
+    active_city = st.session_state.get("active_map", "Map 1")
     city = load_city_graph(active_city)
     events = load_disaster_events(active_city)
     zones = load_evacuation_zones(active_city)
@@ -48,17 +48,18 @@ def render():
 
     st.subheader("City Selector")
     cols = st.columns(3)
-    for i, opt in enumerate(["Veridian City", "Harborfield", "Maplecrest"]):
+    for i, opt in enumerate(MAP_OPTIONS):
         with cols[i]:
-            if st.button(MAP_NAME.get(opt, opt), use_container_width=True, type="primary" if opt == active_city else "secondary"):
+            if st.button(opt, width="stretch", type="primary" if opt == active_city else "secondary"):
+                st.session_state["active_map"] = opt
                 st.session_state["active_city"] = opt
                 st.rerun()
 
     st.markdown(
         f"""
         <div style="margin-bottom: 0.75rem;">
-          <div style="font-size:2rem;font-weight:700;color:#ffffff;">{MAP_NAME.get(active_city, active_city)} - Disaster Command Center</div>
-        <div style="color:#d8dee9;">{datetime.now().strftime("%A, %b %d %Y • %H:%M:%S")}</div>
+          <div style="font-size:2rem;font-weight:700;color:#cad3f5;">{active_city} - Disaster Command Center</div>
+        <div style="color:#b8c0e0;">{datetime.now().strftime("%A, %b %d %Y • %H:%M:%S")}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -76,12 +77,12 @@ def render():
 
     with left:
         fig = build_city_map(city, blocked_edges=blocked, show_labels=False)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with right:
-        st.markdown('<div style="font-size:1.1rem;font-weight:600;color:#88c0d0;">Active Disaster Events</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:1.1rem;font-weight:600;color:#91d7e3;">Active Disaster Events</div>', unsafe_allow_html=True)
         if not active_events:
-            st.markdown('<div class="card" style="color:#d8dee9;">No active disasters</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card" style="color:#b8c0e0;">No active disasters</div>', unsafe_allow_html=True)
         for e in active_events:
             sev = str(e.get("severity", "low")).lower()
             sev_badge = (
@@ -97,12 +98,12 @@ def render():
                 f"""
                 <div class="card">
                   <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <div style="font-weight:700;color:#ffffff;">{str(e.get("type")).title()}</div>
+                    <div style="font-weight:700;color:#cad3f5;">{str(e.get("type")).title()}</div>
                     <div>{sev_badge}</div>
                   </div>
                   <div style="margin-top:0.5rem;color:#d8dee9;">
-                    Affected nodes: <b style="color:#ffffff;">{len(e.get("affected_nodes", []))}</b><br/>
-                    Blocked roads: <b style="color:#ffffff;">{len(e.get("blocked_edges", []))}</b><br/>
+                    Affected nodes: <b style="color:#cad3f5;">{len(e.get("affected_nodes", []))}</b><br/>
+                    Blocked roads: <b style="color:#cad3f5;">{len(e.get("blocked_edges", []))}</b><br/>
                     Timestamp: {e.get("timestamp","")}
                   </div>
                 </div>
@@ -110,7 +111,7 @@ def render():
                 unsafe_allow_html=True,
             )
 
-    st.markdown('<div style="margin-top:0.75rem;font-size:1.1rem;font-weight:600;color:#88c0d0;">Zone Risk Table</div>', unsafe_allow_html=True)
+    st.markdown('<div style="margin-top:0.75rem;font-size:1.1rem;font-weight:600;color:#91d7e3;">Zone Risk Table</div>', unsafe_allow_html=True)
     mm = MissionManager()
     mission_rows = [m for m in mm.load() if m.get("city") == active_city and m.get("status") != "complete"]
     if mission_rows:
@@ -121,11 +122,11 @@ def render():
                 st.markdown(f"**{m['team_name']}**  \n{m['status']}  \nTarget: {m['target_node']}  \nStep {m['current_step']}/{max(1, len(m['path'])-1)}")
                 if st.button("View Mission", key=f"vm_{m['mission_id']}"):
                     st.session_state["nav_to"] = "Rescue Operations"
-        palette = ["#8fbcbb", "#88c0d0", "#81a1c1", "#5e81ac", "#bf616a"]
+        palette = ["#a6da95", "#91d7e3", "#8aadf4", "#c6a0f6", "#ed8796"]
         highlight = []
         for i, m in enumerate(mission_rows):
             highlight.append({"path": m["path"], "color": palette[i % len(palette)], "width": 3, "label": m["mission_id"], "dash": "solid", "show_steps": False})
-        st.plotly_chart(build_city_map(city, highlight_paths=highlight, show_labels=False), use_container_width=True)
+        st.plotly_chart(build_city_map(city, highlight_paths=highlight, show_labels=False), width="stretch")
 
     # Blocked roads per zone (count edges where either endpoint is in zone)
     zone_nodes = {z["zone_id"]: set(z.get("nodes", [])) for z in zones}
@@ -150,7 +151,7 @@ def render():
         )
 
     zone_df = pd.DataFrame(rows)
-    st.dataframe(zone_df, use_container_width=True)
+    st.dataframe(zone_df, width="stretch")
 
     stranded = pd.DataFrame(city["nodes"])[["zone", "people_stranded"]].groupby("zone", as_index=False)["people_stranded"].sum()
     stranded = stranded.rename(columns={"zone": "Zone", "people_stranded": "Total Stranded"})
@@ -159,5 +160,5 @@ def render():
     stranded["Available Teams"] = 0
     stranded["Status"] = stranded["Total Stranded"].apply(lambda x: "Needs Rescue" if x > 0 else "Stable")
     st.subheader("Stranded Population Summary")
-    st.dataframe(stranded, use_container_width=True)
+    st.dataframe(stranded, width="stretch")
 

@@ -12,9 +12,9 @@ _ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = _ROOT / "data"
 CITIES_DIR = DATA_DIR / "cities"
 CITY_MAP = {
-    "Veridian City": "veridian",
-    "Harborfield": "harborfield",
-    "Maplecrest": "maplecrest",
+    "Map 1": "veridian",
+    "Map 2": "map2",
+    "Map 3": "map3",
 }
 
 
@@ -50,6 +50,14 @@ def _city_slug(city: str) -> str:
 
 
 def _city_file(prefix: str, city: str) -> Path:
+    if prefix == "city":
+        city_map_files = {
+            "Map 1": "city_map1.json",
+            "Map 2": "city_map2.json",
+            "Map 3": "city_map3.json",
+        }
+        if city in city_map_files:
+            return CITIES_DIR / city_map_files[city]
     return CITIES_DIR / f"{prefix}_{_city_slug(city)}.json"
 
 

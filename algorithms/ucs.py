@@ -1,15 +1,6 @@
-"""
-UCS — Uniform Cost Search. Tree search with explicit frontier/explored.
-Identical optimality guarantee to Dijkstra, different implementation.
-Time: O((V+E) log V).
-"""
-
 import heapq
 
-
 def ucs(graph: dict, start: str, goal: str) -> tuple[list[str] | None, float]:
-    # Min-heap: (cost, node, path)
-    # explored set, no re-expansion
     if start == goal:
         return [start], 0.0
 

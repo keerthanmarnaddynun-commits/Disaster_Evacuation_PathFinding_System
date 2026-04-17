@@ -1,11 +1,4 @@
-"""
-DFS — finds a path, not necessarily shortest.
-Time: O(V+E), Space: O(V).
-"""
-
-
 def dfs(graph: dict, start: str, goal: str) -> list[str] | None:
-    # iterative stack-based
     if start == goal:
         return [start]
 
